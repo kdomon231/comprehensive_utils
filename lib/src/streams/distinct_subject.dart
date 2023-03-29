@@ -58,7 +58,9 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
 
   final _Wrapper<T> _wrapper;
 
-  static Stream<T> Function() _deferStream<T>(_Wrapper<T> wrapper, StreamController<T> controller, bool sync) => () {
+  static Stream<T> Function() _deferStream<T>(
+          _Wrapper<T> wrapper, StreamController<T> controller, bool sync) =>
+      () {
         final errorAndStackTrace = wrapper.errorAndStackTrace;
         if (errorAndStackTrace != null && !wrapper.isValue) {
           return controller.stream.transform(
@@ -71,7 +73,8 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
 
         final value = wrapper.value;
         if (isNotEmpty(value) && wrapper.isValue) {
-          return controller.stream.transform(StartWithStreamTransformer<T>(value as T));
+          return controller.stream
+              .transform(StartWithStreamTransformer<T>(value as T));
         }
 
         return controller.stream;
@@ -84,7 +87,8 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
   void onAdd(T event) => _wrapper.setValue(event);
 
   @override
-  void onAddError(Object error, [StackTrace? stackTrace]) => _wrapper.setError(error, stackTrace);
+  void onAddError(Object error, [StackTrace? stackTrace]) =>
+      _wrapper.setError(error, stackTrace);
 
   @override
   DistinctValueStream<T> get stream => _DistinctSubjectStream(this);
@@ -141,7 +145,8 @@ class _Wrapper<T> {
     isValue = true;
   }
 
-  void handleData(T inputEvent, void Function(T) add, void Function(Object error, [StackTrace? stackTrace]) addError) {
+  void handleData(T inputEvent, void Function(T) add,
+      void Function(Object error, [StackTrace? stackTrace]) addError) {
     final previous = value;
     if (identical(previous, EMPTY)) {
       // First event. Cannot use [_equals].
@@ -173,7 +178,8 @@ class _Wrapper<T> {
   }
 }
 
-class _DistinctSubjectStream<T> extends Stream<T> implements DistinctValueStream<T> {
+class _DistinctSubjectStream<T> extends Stream<T>
+    implements DistinctValueStream<T> {
   _DistinctSubjectStream(this._subject);
 
   final DistinctSubject<T> _subject;
@@ -191,7 +197,8 @@ class _DistinctSubjectStream<T> extends Stream<T> implements DistinctValueStream
     if (identical(this, other)) {
       return true;
     }
-    return other is _DistinctSubjectStream && identical(other._subject, _subject);
+    return other is _DistinctSubjectStream &&
+        identical(other._subject, _subject);
   }
 
   @override
