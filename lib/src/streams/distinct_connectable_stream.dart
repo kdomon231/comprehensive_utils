@@ -1,8 +1,7 @@
 import 'dart:async';
 
+import 'package:comprehensive_utils/src/streams/distinct_subject.dart';
 import 'package:rxdart/rxdart.dart';
-
-import 'distinct_subject.dart';
 
 abstract class _AbstractDistinctConnectableStream<T, S extends Subject<T>,
     R extends Stream<T>> extends AbstractConnectableStream<T, S, R> {
