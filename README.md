@@ -15,20 +15,46 @@ and the Flutter guide for
 
 ## Features
 
-...
+Widgets:
+
+* FluentListView
+
+Tools:
+
+* ObservableTimer
+
+Streams:
+
+* DistinctSubject
+* DistinctValueStream
+* DistinctConnectableStream
+* GetStream
+* MiniStream
+
+Extensions:
+
+* shareDistinctValue
+* shareDistinctValueSeeded
+* publishDistinctValue
+* publishDistinctValueSeeded
 
 ## Getting started
 
-...
+Add package import:
+
+```dart
+import 'package:comprehensive_utils/comprehensive_utils.dart';
+```
 
 ## Usage
 
-...
-
 ```dart
-const like = 'sample';
+final DistinctSubject<String> _userNameSubject = DistinctSubject<String>();
+
+DistinctValueStream<String> get userNameStream => _userNameSubject.stream;
+
+void changeUserName(String userName) {
+  // the value will be added to Stream if it differs from the previous one
+  _userNameSubject.add(userName);
+}
 ```
-
-## Additional information
-
-...
