@@ -2,6 +2,8 @@
 
 import 'dart:async';
 
+import 'package:comprehensive_utils/src/mixins/add_stream_mixin.dart';
+import 'package:comprehensive_utils/src/mixins/distinct_mixin.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:rxdart/src/transformers/start_with_error.dart';
 import 'package:rxdart/src/utils/empty.dart';
@@ -32,7 +34,7 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
     super.controller,
     super.stream,
     this._wrapper,
-  );
+  ) : _controller = controller;
 
   factory DistinctSubject.seeded(
     T seedValue, {
@@ -57,6 +59,7 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
   }
 
   final _Wrapper<T> _wrapper;
+  final StreamController<T> _controller;
 
   static Stream<T> Function() _deferStream<T>(
           _Wrapper<T> wrapper, StreamController<T> controller, bool sync) =>
@@ -81,20 +84,13 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
       };
 
   @override
-  void add(T event) => _wrapper.handleData(event, super.add, super.addError);
-
-  @override
-  void onAdd(T event) => _wrapper.setValue(event);
-
-  @override
-  void onAddError(Object error, [StackTrace? stackTrace]) =>
-      _wrapper.setError(error, stackTrace);
-
-  @override
   DistinctValueStream<T> get stream => _DistinctSubjectStream(this);
 
   @override
   bool get hasValue => isNotEmpty(_wrapper.value);
+
+  @override
+  T? get valueOrNull => unbox(_wrapper.value);
 
   @override
   T get value {
@@ -104,9 +100,6 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
     }
     throw ValueStreamError.hasNoValue();
   }
-
-  @override
-  T? get valueOrNull => unbox(_wrapper.value);
 
   set value(T newValue) => add(newValue);
 
@@ -127,49 +120,77 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
 
   @override
   StackTrace? get stackTrace => _wrapper.errorAndStackTrace?.stackTrace;
-}
 
-class _Wrapper<T> {
-  _Wrapper([this.equals]) : isValue = false;
-
-  _Wrapper.seeded(this.value, [this.equals]) : isValue = true;
-
-  // ignore: type_annotate_public_apis
-  var value = EMPTY;
-  ErrorAndStackTrace? errorAndStackTrace;
-  bool isValue;
-  final bool Function(T, T)? equals;
-
-  void setValue(T event) {
-    value = event;
-    isValue = true;
+  @override
+  void add(T event) {
+    if (_wrapper.isAddingStreamItems) {
+      throw StateError(
+          'You cannot add items while items are being added from addStream');
+    }
+    _add(event);
   }
 
-  void handleData(T inputEvent, void Function(T) add,
-      void Function(Object error, [StackTrace? stackTrace]) addError) {
-    final previous = value;
-    if (identical(previous, EMPTY)) {
-      // First event. Cannot use [_equals].
-      add(inputEvent);
-    } else {
-      final T previousEvent = previous as T;
-      final equals = this.equals;
-      final bool isEqual;
-      try {
-        if (equals == null) {
-          isEqual = previousEvent == inputEvent;
-        } else {
-          isEqual = equals(previousEvent, inputEvent);
-        }
-      } catch (e, s) {
-        final AsyncError? replacement = Zone.current.errorCallback(e, s);
-        addError(replacement?.error ?? e, replacement?.stackTrace ?? s);
-        return;
-      }
-      if (!isEqual) {
-        add(inputEvent);
-      }
+  void _add(T event) => _wrapper.handleData(event, _onAddHandled, _addError);
+
+  void _onAddHandled(T event) {
+    if (!_controller.isClosed) {
+      _wrapper.setValue(event);
     }
+
+    // if the controller is closed, calling add() will throw an StateError.
+    // that is expected behavior.
+    _controller.add(event);
+  }
+
+  @override
+  void onAdd(T event) =>
+      _wrapper.handleData(event, _wrapper.setValue, _addError);
+
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) {
+    if (_wrapper.isAddingStreamItems) {
+      throw StateError(
+          'You cannot add an error while items are being added from addStream');
+    }
+    _addError(error, stackTrace);
+  }
+
+  void _addError(Object error, [StackTrace? stackTrace]) {
+    if (!_controller.isClosed) {
+      onAddError(error, stackTrace);
+    }
+
+    // if the controller is closed, calling addError() will throw an StateError.
+    // that is expected behavior.
+    _controller.addError(error, stackTrace);
+  }
+
+  @override
+  void onAddError(Object error, [StackTrace? stackTrace]) =>
+      _wrapper.setError(error, stackTrace);
+
+  @override
+  Future<void> addStream(Stream<T> source, {bool? cancelOnError}) =>
+      _wrapper.addStream(source, _add, _addError, cancelOnError: cancelOnError);
+}
+
+class _Wrapper<T> with DistinctMixin<T>, AddStreamMixin<T> {
+  _Wrapper([this.equals]) : isValue = false;
+
+  _Wrapper.seeded(this._value, [this.equals]) : isValue = true;
+
+  var _value = EMPTY;
+  bool isValue;
+  @override
+  final bool Function(T, T)? equals;
+  ErrorAndStackTrace? errorAndStackTrace;
+
+  @override
+  Object? get value => _value;
+
+  void setValue(T event) {
+    _value = event;
+    isValue = true;
   }
 
   void setError(Object error, StackTrace? stackTrace) {
