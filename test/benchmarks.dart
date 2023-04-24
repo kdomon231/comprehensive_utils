@@ -1,6 +1,8 @@
+// ignore_for_file: avoid_print
 import 'dart:async';
 
-import 'package:comprehensive_utils/comprehensive_utils.dart';
+import 'package:comprehensive_utils/src/streams/get_stream.dart';
+import 'package:comprehensive_utils/src/streams/mini_stream.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() async {
@@ -11,7 +13,7 @@ void main() async {
   });
 }
 
-int times = 30000;
+const int times = 30000;
 
 int get last => times - 1;
 
@@ -25,7 +27,8 @@ Future<String> getStream() {
     if (last == v) {
       timer.stop();
       c.complete(
-          '''$v listeners notified | [GET_STREAM] objs time: ${timer.elapsedMicroseconds}ms''');
+        '''$v listeners notified | [GET_STREAM] objs time: ${timer.elapsedMicroseconds}ms''',
+      );
     }
   });
 
@@ -45,7 +48,8 @@ Future<String> newStream() {
     if (last == v) {
       timer.stop();
       c.complete(
-          '''$v listeners notified | [LIGHT_STREAM] objs time: ${timer.elapsedMicroseconds}ms''');
+        '''$v listeners notified | [LIGHT_STREAM] objs time: ${timer.elapsedMicroseconds}ms''',
+      );
     }
   });
 
@@ -67,7 +71,8 @@ Future<String> stream() {
     if (last == v) {
       timer.stop();
       c.complete(
-          '''$v listeners notified | [STREAM] objs time: ${timer.elapsedMicroseconds}ms''');
+        '''$v listeners notified | [STREAM] objs time: ${timer.elapsedMicroseconds}ms''',
+      );
     }
   });
 

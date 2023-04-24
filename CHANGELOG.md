@@ -1,3 +1,9 @@
+## 0.5.2
+
+* Fixed .addStream() in DistinctSubject
+* Disabled GetStream and MiniStream export until rewritten and tested
+* Minor improvements
+
 ## 0.5.0
 
 * Added FluentListView

@@ -26,8 +26,10 @@ Streams:
 * DistinctSubject
 * DistinctValueStream
 * DistinctConnectableStream
-* GetStream
-* MiniStream
+
+[//]: # (* GetStream)
+
+[//]: # (* MiniStream)
 
 Extensions:
 

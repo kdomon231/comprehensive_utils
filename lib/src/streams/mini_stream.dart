@@ -8,8 +8,13 @@ class Node<T> {
 }
 
 class MiniSubscription<T> {
-  const MiniSubscription(this.data, this.onError, this.onDone, this.listener,
-      {this.cancelOnError = false});
+  const MiniSubscription(
+    this.data,
+    this.onError,
+    this.onDone,
+    this.listener, {
+    this.cancelOnError = false,
+  });
 
   final OnData<T> data;
   final Function? onError;

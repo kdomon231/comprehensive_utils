@@ -1,4 +1,6 @@
-import 'package:comprehensive_utils/comprehensive_utils.dart';
+// ignore_for_file: avoid_print
+
+import 'package:comprehensive_utils/src/streams/get_stream.dart';
 
 Future<void> main() async {
   final controller = GetStream<int>()
@@ -6,7 +8,7 @@ Future<void> main() async {
       (event) {
         print('change number to $event');
       },
-      onError: (err, s) {
+      onError: (dynamic err, s) {
         print(err);
       },
       cancelOnError: true,

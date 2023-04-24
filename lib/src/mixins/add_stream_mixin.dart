@@ -13,7 +13,8 @@ mixin AddStreamMixin<T> {
   }) {
     if (_isAddingStreamItems) {
       throw StateError(
-          'You cannot add items while items are being added from addStream');
+        'You cannot add items while items are being added from addStream',
+      );
     }
     _isAddingStreamItems = true;
 

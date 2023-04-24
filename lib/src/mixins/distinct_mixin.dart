@@ -9,8 +9,11 @@ mixin DistinctMixin<T> {
 
   Object? get value;
 
-  void handleData(T inputEvent, void Function(T) add,
-      void Function(Object error, [StackTrace? stackTrace]) addError) {
+  void handleData(
+    T inputEvent,
+    void Function(T) add,
+    void Function(Object error, [StackTrace? stackTrace]) addError,
+  ) {
     final previous = value;
     if (identical(previous, EMPTY)) {
       // First event. Cannot use [_equals].

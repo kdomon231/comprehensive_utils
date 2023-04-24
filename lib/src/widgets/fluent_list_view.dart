@@ -89,10 +89,10 @@ class FluentListView<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     // probably bug in SliverChildBuilderDelegate, temporary solution
     bool skipRestoration = false;
-    return InitBuilder.arg<ValueStream<IList<T>>, Stream<Iterable<T>>>(
-      getter: _getValueStream<T>,
+    return InitBuilder.arg<Stream<IList<T>>, Stream<Iterable<T>>>(
+      getter: _getMappedStream<T>,
       arg: _stream,
-      disposer: (stream) => stream.drain(),
+      disposer: (stream) => stream.drain<void>(),
       builder: (context, stream) {
         return _DistinctBuilder<IList<T>>(
           waiting: waiting,
@@ -163,8 +163,11 @@ class FluentListView<T> extends StatelessWidget {
     );
   }
 
-  static bool _equals<T>(IList<T> list1, IList<T> list2,
-      {bool Function(T, T)? itemEquality}) {
+  static bool _equals<T>(
+    IList<T> list1,
+    IList<T> list2, {
+    bool Function(T, T)? itemEquality,
+  }) {
     final length = list1.length;
     if (length != list2.length) {
       return false;
@@ -178,8 +181,11 @@ class FluentListView<T> extends StatelessWidget {
     return true;
   }
 
-  static bool _equalsUnordered<T>(IList<T> elements1, IList<T> elements2,
-      {bool Function(T, T)? itemEquality}) {
+  static bool _equalsUnordered<T>(
+    IList<T> elements1,
+    IList<T> elements2, {
+    bool Function(T, T)? itemEquality,
+  }) {
     const defaultEquality = DefaultEquality<Never>();
     final counts = HashMap<T, int>(
       equals: itemEquality ?? defaultEquality.equals,
@@ -207,13 +213,17 @@ class FluentListView<T> extends StatelessWidget {
 
   static Widget _nilClosed(BuildContext _, Object? __) => const Nil();
 
-  static Widget _nilError(BuildContext _, Object __, StackTrace? ___) {
-    return const Nil();
-  }
+  static Widget _nilError(BuildContext _, Object __, StackTrace? ___) =>
+      const Nil();
 }
 
-ValueStream<IList<T>> _getValueStream<T>(Stream<Iterable<T>> base) =>
-    base.map<IList<T>>((event) => event.toIList()).shareDistinctValue();
+Stream<IList<T>> _getMappedStream<T>(Stream<Iterable<T>> baseStream) =>
+    baseStream.map(
+      (event) => event.toIList(
+        // ignore: avoid_redundant_argument_values
+        const ConfigList(isDeepEquals: true, cacheHashCode: true),
+      ),
+    );
 
 class _ListViewBase extends BoxScrollView {
   const _ListViewBase({
@@ -291,7 +301,7 @@ class _DistinctBuilderState<T> extends State<_DistinctBuilder<T>>
   StackTrace? _lastStackTrace;
   bool _hasFired = false;
   bool _isClosed = false;
-  StreamSubscription? _subscription;
+  StreamSubscription<T>? _subscription;
 
   void _cancel() {
     if (!widget.retain) {

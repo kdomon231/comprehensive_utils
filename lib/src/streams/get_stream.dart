@@ -22,7 +22,7 @@ class GetStream<T> {
     if (!_isBusy!) {
       return _onData!.remove(subs);
     } else {
-      await Future.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
       return _onData!.remove(subs);
     }
   }
@@ -31,7 +31,7 @@ class GetStream<T> {
     if (!_isBusy!) {
       return _onData!.add(subs);
     } else {
-      await Future.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
       return _onData!.add(subs);
     }
   }
@@ -132,8 +132,12 @@ class GetStream<T> {
 }
 
 class LightSubscription<T> extends StreamSubscription<T> {
-  LightSubscription(this._removeSubscription,
-      {this.onPause, this.onResume, this.onCancel});
+  LightSubscription(
+    this._removeSubscription, {
+    this.onPause,
+    this.onResume,
+    this.onCancel,
+  });
 
   final RemoveSubscription<T> _removeSubscription;
   final void Function()? onPause;
@@ -208,7 +212,8 @@ class GetStreamTransformation<T> extends Stream<T> {
 }
 
 typedef RemoveSubscription<T> = FutureOr<bool> Function(
-    LightSubscription<T> subs);
+  LightSubscription<T> subs,
+);
 
 typedef AddSubscription<T> = FutureOr<void> Function(LightSubscription<T> subs);
 

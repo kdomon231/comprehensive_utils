@@ -1,4 +1,4 @@
-import 'package:comprehensive_utils/comprehensive_utils.dart';
+import 'package:comprehensive_utils/src/streams/get_stream.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

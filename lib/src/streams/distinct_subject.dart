@@ -62,7 +62,10 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
   final StreamController<T> _controller;
 
   static Stream<T> Function() _deferStream<T>(
-          _Wrapper<T> wrapper, StreamController<T> controller, bool sync) =>
+    _Wrapper<T> wrapper,
+    StreamController<T> controller,
+    bool sync,
+  ) =>
       () {
         final errorAndStackTrace = wrapper.errorAndStackTrace;
         if (errorAndStackTrace != null && !wrapper.isValue) {
@@ -125,7 +128,8 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
   void add(T event) {
     if (_wrapper.isAddingStreamItems) {
       throw StateError(
-          'You cannot add items while items are being added from addStream');
+        'You cannot add items while items are being added from addStream',
+      );
     }
     _add(event);
   }
@@ -150,7 +154,8 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
   void addError(Object error, [StackTrace? stackTrace]) {
     if (_wrapper.isAddingStreamItems) {
       throw StateError(
-          'You cannot add an error while items are being added from addStream');
+        'You cannot add an error while items are being added from addStream',
+      );
     }
     _addError(error, stackTrace);
   }
