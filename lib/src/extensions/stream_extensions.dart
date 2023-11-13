@@ -1,7 +1,7 @@
 import 'package:comprehensive_utils/src/streams/distinct_connectable_stream.dart';
 import 'package:comprehensive_utils/src/streams/distinct_subject.dart';
 
-extension CustomStreamExtensions<T> on Stream<T> {
+extension StreamDistinctExtensions<T> on Stream<T> {
   DistinctValueConnectableStream<T> publishDistinctValue([
     bool Function(T, T)? equals,
   ]) =>

@@ -54,10 +54,10 @@ class FluentListView<T> extends StatelessWidget {
         );
 
   final Stream<Iterable<T>> _stream;
-  final Widget Function(BuildContext) waiting;
-  final Widget Function(BuildContext, int, T?) itemBuilder;
-  final Widget Function(BuildContext, Object, StackTrace?) error;
-  final Widget Function(BuildContext, IList<T>?) closed;
+  final Widget Function(BuildContext context) waiting;
+  final Widget Function(BuildContext context, int index, T? value) itemBuilder;
+  final Widget Function(BuildContext context, Object, StackTrace?) error;
+  final Widget Function(BuildContext context, IList<T>?) closed;
   final IList<T> initial;
   final bool retain;
   final bool pause;
