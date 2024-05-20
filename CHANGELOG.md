@@ -1,3 +1,23 @@
+## 0.6.3
+
+* Added .takeUntilFuture() Stream extension
+* Bumped dependencies
+
+## 0.6.2
+
+* Added .parseIterable() extension
+
+## 0.6.1
+
+* Bumped dependencies
+
+## 0.6.0
+
+* Added CacheManager
+* Added .parseList() extension
+* Added (syntactic sugar) function extensions .apply()
+* Bumped Dart SDK >=3.0.0
+
 ## 0.5.2
 
 * Fixed .addStream() in DistinctSubject

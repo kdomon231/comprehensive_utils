@@ -93,73 +93,64 @@ class FluentListView<T> extends StatelessWidget {
       getter: _getMappedStream<T>,
       arg: _stream,
       disposer: (stream) => stream.drain<void>(),
-      builder: (context, stream) {
-        return _DistinctBuilder<IList<T>>(
-          waiting: waiting,
-          error: error,
-          closed: closed,
-          initial: initial,
-          retain: retain,
-          pause: pause,
-          silent: silent,
-          keepAlive: keepAlive,
-          reportError: reportError,
-          stream: stream!.shareDistinctValue((list1, list2) {
-            skipRestoration = retain && list2.length < list1.length;
-            return _equality(list1, list2, itemEquality: itemComparator);
-          }),
-          builder: (context, value) {
-            return _ListViewBase(
-              itemCount: value!.length,
-              scrollDirection: scrollDirection,
-              reverse: reverse,
-              controller: controller,
-              primary: primary,
-              physics: physics,
-              shrinkWrap: shrinkWrap,
-              padding: padding,
-              itemExtent: itemExtent,
-              prototypeItem: prototypeItem,
-              cacheExtent: cacheExtent,
-              dragStartBehavior: dragStartBehavior,
-              keyboardDismissBehavior: keyboardDismissBehavior,
-              restorationId: restorationId,
-              clipBehavior: clipBehavior,
-              childrenDelegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return _DistinctBuilder<T>(
-                    key: ValueKey<T>(value[index]),
-                    waiting: _nilWaiting,
-                    error: _nilError,
-                    closed: _nilClosed,
-                    retain: retain,
-                    pause: pause,
-                    silent: true,
-                    keepAlive: keepAlive,
-                    stream: stream
-                        .map((event) => event[index])
-                        .shareDistinctValue(),
-                    builder: (context, item) =>
-                        itemBuilder(context, index, item),
-                  );
-                },
-                findChildIndexCallback: (key) {
-                  if (skipRestoration) {
-                    return null;
-                  }
-                  final index = value
-                      .indexWhere((item) => item == (key as ValueKey<T>).value);
-                  return index == -1 ? null : index;
-                },
-                childCount: value.length,
-                addAutomaticKeepAlives: addAutomaticKeepAlives,
-                addRepaintBoundaries: addRepaintBoundaries,
-                addSemanticIndexes: addSemanticIndexes,
-              ),
-            );
-          },
-        );
-      },
+      builder: (context, stream) => _DistinctBuilder<IList<T>>(
+        waiting: waiting,
+        error: error,
+        closed: closed,
+        initial: initial,
+        retain: retain,
+        pause: pause,
+        silent: silent,
+        keepAlive: keepAlive,
+        reportError: reportError,
+        stream: stream!.shareDistinctValue((list1, list2) {
+          skipRestoration = retain && list2.length < list1.length;
+          return _equality(list1, list2, itemEquality: itemComparator);
+        }),
+        builder: (context, value) => _ListViewBase(
+          itemCount: value!.length,
+          scrollDirection: scrollDirection,
+          reverse: reverse,
+          controller: controller,
+          primary: primary,
+          physics: physics,
+          shrinkWrap: shrinkWrap,
+          padding: padding,
+          itemExtent: itemExtent,
+          prototypeItem: prototypeItem,
+          cacheExtent: cacheExtent,
+          dragStartBehavior: dragStartBehavior,
+          keyboardDismissBehavior: keyboardDismissBehavior,
+          restorationId: restorationId,
+          clipBehavior: clipBehavior,
+          childrenDelegate: SliverChildBuilderDelegate(
+            (context, index) => _DistinctBuilder<T>(
+              key: ValueKey<T>(value[index]),
+              waiting: _nilWaiting,
+              error: _nilError,
+              closed: _nilClosed,
+              retain: retain,
+              pause: pause,
+              silent: true,
+              keepAlive: keepAlive,
+              stream: stream.map((event) => event[index]).shareDistinctValue(),
+              builder: (context, item) => itemBuilder(context, index, item),
+            ),
+            findChildIndexCallback: (key) {
+              if (skipRestoration) {
+                return null;
+              }
+              final index = value
+                  .indexWhere((item) => item == (key as ValueKey<T>).value);
+              return index == -1 ? null : index;
+            },
+            childCount: value.length,
+            addAutomaticKeepAlives: addAutomaticKeepAlives,
+            addRepaintBoundaries: addRepaintBoundaries,
+            addSemanticIndexes: addSemanticIndexes,
+          ),
+        ),
+      ),
     );
   }
 
@@ -217,12 +208,13 @@ class FluentListView<T> extends StatelessWidget {
       const Nil();
 }
 
+// ignore: avoid_redundant_argument_values
+const ConfigList _defaultListConfig =
+    ConfigList(isDeepEquals: true, cacheHashCode: true);
+
 Stream<IList<T>> _getMappedStream<T>(Stream<Iterable<T>> baseStream) =>
     baseStream.map(
-      (event) => event.toIList(
-        // ignore: avoid_redundant_argument_values
-        const ConfigList(isDeepEquals: true, cacheHashCode: true),
-      ),
+      (event) => event.toIList(_defaultListConfig),
     );
 
 class _ListViewBase extends BoxScrollView {
@@ -333,13 +325,14 @@ class _DistinctBuilderState<T> extends State<_DistinctBuilder<T>>
   }
 
   void _updatePause() {
-    if (_subscription != null) {
+    final subscription = _subscription;
+    if (subscription != null) {
       if (widget.pause) {
-        if (!_subscription!.isPaused) {
-          _subscription!.pause();
+        if (!subscription.isPaused) {
+          subscription.pause();
         }
-      } else if (_subscription!.isPaused) {
-        _subscription!.resume();
+      } else if (subscription.isPaused) {
+        subscription.resume();
       }
     }
   }
@@ -391,12 +384,10 @@ class _DistinctBuilderState<T> extends State<_DistinctBuilder<T>>
   void didUpdateWidget(_DistinctBuilder<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.stream != null) {
-      if (widget.stream != oldWidget.stream) {
-        _initStream();
-      }
-    } else {
+    if (widget.stream == null) {
       _cancel();
+    } else if (widget.stream != oldWidget.stream) {
+      _initStream();
     }
 
     _updatePause();
