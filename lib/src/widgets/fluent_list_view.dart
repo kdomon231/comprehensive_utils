@@ -13,7 +13,17 @@ import 'package:flutter/rendering.dart';
 import 'package:nil/nil.dart';
 import 'package:rxdart/rxdart.dart';
 
+// ignore_for_file: avoid_redundant_argument_values
+
+/// A FluentListView widget is a widget that displays a scrolling, linear list of elements.
+/// It listens to a stream of iterable of type T and builds the list based on the elements in the stream.
+/// The widget supports various configuration options such as waiting, error, closed, initial, retain, pause, silent, keepAlive, reportError, scrollDirection, reverse, controller, primary, physics, shrinkWrap, padding, itemExtent, prototypeItem, addAutomaticKeepAlives, addRepaintBoundaries, addSemanticIndexes, cacheExtent, dragStartBehavior, keyboardDismissBehavior, restorationId, clipBehavior, itemComparator, and ignoreOrder.
 class FluentListView<T> extends StatelessWidget {
+  /// Creates a FluentListView widget.
+  ///
+  /// The [stream] parameter is required and specifies the stream of iterable of type T.
+  /// The [itemBuilder] parameter is required and specifies the builder for each item in the list.
+  /// The other parameters are optional and provide various configuration options for the widget.
   const FluentListView({
     required Stream<Iterable<T>> stream,
     required this.itemBuilder,
@@ -92,7 +102,6 @@ class FluentListView<T> extends StatelessWidget {
     return InitBuilder.arg<Stream<IList<T>>, Stream<Iterable<T>>>(
       getter: _getMappedStream<T>,
       arg: _stream,
-      disposer: (stream) => stream.drain<void>(),
       builder: (context, stream) => _DistinctBuilder<IList<T>>(
         waiting: waiting,
         error: error,
@@ -208,7 +217,6 @@ class FluentListView<T> extends StatelessWidget {
       const Nil();
 }
 
-// ignore: avoid_redundant_argument_values
 const ConfigList _defaultListConfig =
     ConfigList(isDeepEquals: true, cacheHashCode: true);
 

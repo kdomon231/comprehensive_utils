@@ -1,11 +1,16 @@
+## 0.6.4
+
+* Added `IndexingCollection<T>`
+* Improved documentation
+
 ## 0.6.3
 
-* Added .takeUntilFuture() Stream extension
+* Added `takeUntilFuture()` Stream extension
 * Bumped dependencies
 
 ## 0.6.2
 
-* Added .parseIterable() extension
+* Added `parseIterable()` extension
 
 ## 0.6.1
 
@@ -13,22 +18,22 @@
 
 ## 0.6.0
 
-* Added CacheManager
-* Added .parseList() extension
-* Added (syntactic sugar) function extensions .apply()
+* Added `CacheManager`
+* Added `parseList()` extension
+* Added (syntactic sugar) function extensions `apply()`
 * Bumped Dart SDK >=3.0.0
 
 ## 0.5.2
 
-* Fixed .addStream() in DistinctSubject
-* Disabled GetStream and MiniStream export until rewritten and tested
+* Fixed `addStream()` in `DistinctSubject`
+* Disabled `GetStream` and `MiniStream` export until rewritten and tested
 * Minor improvements
 
 ## 0.5.0
 
-* Added FluentListView
-* Added GetStream
-* Added MiniStream
+* Added `FluentListView`
+* Added `GetStream`
+* Added `MiniStream`
 * Added example
 
 ## 0.1.1

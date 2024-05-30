@@ -30,7 +30,17 @@ extension StreamDistinctExtensions<T> on Stream<T> {
       publishDistinctValueSeeded(seedValue, equals).refCount();
 }
 
+/// Extension on Stream to add the `takeUntilFuture` method.
+///
+/// This method creates a new Stream that emits events from the original Stream until a Future completes.
+/// After that, the new Stream is closed.
 extension StreamAsyncExtensions<T> on Stream<T> {
+  /// Creates a new Stream that emits events from the original Stream until a Future completes.
+  ///
+  /// The new Stream is closed after the Future completes.
+  /// If the Future completes with an error, the new Stream emits that error and is closed.
+  ///
+  /// The new Stream is a broadcast Stream if the original Stream is a broadcast Stream.
   Stream<T> takeUntilFuture(Future<void> trigger) {
     final controller = isBroadcast
         ? StreamController<T>.broadcast(sync: true)
