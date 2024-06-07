@@ -4,7 +4,7 @@ extension OnTapShortcut<T> on ValueChanged<T> {
   /// Extension (syntactic sugar) on `void Function(T value)` to provide a convenient way
   /// to assign possible nullable Function to eg. widget's property.
   ///
-  /// This is a shorthand for calling `callback != null ? callback : null`.
+  /// This is a shorthand for calling `callback != null ? callback! : null`.
   ///
   /// Example usage:
   /// ```dart
@@ -22,7 +22,7 @@ extension OnTapShortcutAsync<T> on AsyncValueSetter<T> {
   /// Extension (syntactic sugar) on `Future<void> Function(T value)` to provide a convenient way
   /// to assign possible nullable async Function to eg. widget's property.
   ///
-  /// This is a shorthand for calling `callback != null ? callback : null`.
+  /// This is a shorthand for calling `callback != null ? callback! : null`.
   ///
   /// Example usage:
   /// ```dart

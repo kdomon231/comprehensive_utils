@@ -3,7 +3,7 @@ import 'package:collection/collection.dart';
 
 /// A class representing a collection of items with integer keys.
 ///
-/// This class provides methods to add, remove, and clear items from the collection.
+/// This class provides methods to [add], [remove], and [clear] items from the collection.
 /// It also allows accessing items using their keys.
 class IndexingCollection<T> {
   IndexingCollection();
@@ -18,23 +18,23 @@ class IndexingCollection<T> {
   // A counter that is used to generate new keys for the items.
   int _counter = 0;
 
-  /// Accesses the item with the given key from the collection.
+  /// Accesses the item with the given [key] from the collection.
   ///
   /// Returns `null` if no item with the given key exists in the collection.
   T? operator [](int key) => _hashMap[key];
 
-  /// Adds a new item to the collection and returns its key.
+  /// Adds a new item to the collection and returns its `key`.
   ///
   /// If there are released keys in the queue, a new item is added using one of those keys.
   ///
-  /// Returns the key assigned to the new item.
+  /// Returns the `key` assigned to the new item.
   int add(T value) {
     final id = _releasedIds.isEmpty ? ++_counter : _releasedIds.removeFirst();
     _hashMap[id] = value;
     return id;
   }
 
-  /// Removes the item with the given key from the collection and returns its value.
+  /// Removes the item with the given [key] from the collection and returns its value.
   ///
   /// If the item was successfully removed, its key is added to the queue of released keys.
   ///
@@ -47,7 +47,7 @@ class IndexingCollection<T> {
     return value;
   }
 
-  /// Clears the collection, removing all items and resetting the counter.
+  /// Clears the collection, removing all items and resetting the [_counter].
   void clear() {
     _hashMap.clear();
     _releasedIds.clear();

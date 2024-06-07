@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 ///
 /// This class is a wrapper around [RestartableTimer] that adds the ability to observe the elapsed time.
 class ObservableTimer extends RestartableTimer {
-  /// Creates a new [ObservableTimer] that will call [callback] after [duration] has elapsed.
+  /// Creates a new `ObservableTimer` that will call [callback] after [duration] has elapsed.
   ///
   /// The [callback] will be called with no arguments.
   factory ObservableTimer(Duration duration, VoidCallback callback) {

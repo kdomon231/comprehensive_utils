@@ -2,13 +2,23 @@ import 'dart:async';
 
 import 'package:comprehensive_utils/src/streams/distinct_connectable_stream.dart';
 import 'package:comprehensive_utils/src/streams/distinct_subject.dart';
+import 'package:rxdart/streams.dart';
 
 extension StreamDistinctExtensions<T> on Stream<T> {
+  /// Creates a `DistinctValueConnectableStream` that emits distinct values from this stream.
+  ///
+  /// The [equals] function is used to determine if two values are equal. If it is not provided,
+  /// the `==` operator is used.
   DistinctValueConnectableStream<T> publishDistinctValue([
     bool Function(T, T)? equals,
   ]) =>
       DistinctValueConnectableStream<T>(this, sync: true, equals: equals);
 
+  /// Creates a `DistinctValueConnectableStream` that emits distinct values from this stream,
+  /// starting with the provided [seedValue].
+  ///
+  /// The [equals] function is used to determine if two values are equal. If it is not provided,
+  /// the `==` operator is used.
   DistinctValueConnectableStream<T> publishDistinctValueSeeded(
     T seedValue, [
     bool Function(T, T)? equals,
@@ -20,24 +30,60 @@ extension StreamDistinctExtensions<T> on Stream<T> {
         equals: equals,
       );
 
+  /// Creates a `DistinctValueStream` that emits distinct values from this stream,
+  /// and automatically manages the subscription and cancellation of the underlying stream.
+  ///
+  /// The [equals] function is used to determine if two values are equal. If it is not provided,
+  /// the `==` operator is used.
+  ///
+  /// Returns a `DistinctValueStream` that emits distinct values from this stream.
   DistinctValueStream<T> shareDistinctValue([bool Function(T, T)? equals]) =>
       publishDistinctValue(equals).refCount();
 
+  /// Creates a `DistinctValueStream` that emits distinct values from this stream,
+  /// starting with the provided [seedValue], and automatically manages the subscription
+  /// and cancellation of the underlying stream.
+  ///
+  /// The [equals] function is used to determine if two values are equal. If it is not provided,
+  /// the `==` operator is used.
   DistinctValueStream<T> shareDistinctValueSeeded(
     T seedValue, [
     bool Function(T, T)? equals,
   ]) =>
       publishDistinctValueSeeded(seedValue, equals).refCount();
+
+  /// Maps the values of this stream to a new stream of type [R], while ensuring that only distinct
+  /// values are emitted.
+  ///
+  /// If the original stream is a `ValueStream` containing value,
+  /// the new stream will start with that value converted to type [R].
+  ///
+  /// The [convert] function is used to convert each value of this stream to a value of type [R].
+  /// The [equals] function is used to determine if two values of type [R] are equal. If it is not
+  /// provided, the `==` operator is used.
+  ///
+  /// Returns a `DistinctValueStream` that emits distinct values of type [R], and automatically
+  /// manages the subscription and cancellation of the underlying stream.
+  DistinctValueStream<R> mapDistinctValue<R>(R Function(T value) convert,
+      [bool Function(R, R)? equals]) {
+    if (this case final ValueStream<T> stream when stream.hasValue) {
+      return DistinctValueConnectableStream<R>.seeded(
+        stream.map(convert),
+        convert(stream.value),
+        sync: true,
+        equals: equals,
+      ).refCount();
+    }
+    return DistinctValueConnectableStream<R>(map(convert),
+            sync: true, equals: equals)
+        .refCount();
+  }
 }
 
-/// Extension on Stream to add the `takeUntilFuture` method.
-///
-/// This method creates a new Stream that emits events from the original Stream until a Future completes.
-/// After that, the new Stream is closed.
 extension StreamAsyncExtensions<T> on Stream<T> {
-  /// Creates a new Stream that emits events from the original Stream until a Future completes.
+  /// Creates a new `Stream` that emits events from the original `Stream` until the `Future` [trigger] completes.
   ///
-  /// The new Stream is closed after the Future completes.
+  /// The new Stream is closed after the Future completes or when the original Stream is closed.
   /// If the Future completes with an error, the new Stream emits that error and is closed.
   ///
   /// The new Stream is a broadcast Stream if the original Stream is a broadcast Stream.

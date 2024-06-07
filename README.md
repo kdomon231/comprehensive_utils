@@ -13,15 +13,17 @@ and the Flutter guide for
 
 ## Features
 
-Widgets:
+Widgets
 
 * FluentListView
 
-Tools:
+Tools
 
+* IndexingCollection\<T>
 * ObservableTimer
+* CacheManager
 
-Streams:
+Streams
 
 * DistinctSubject
 * DistinctValueStream
@@ -31,12 +33,22 @@ Streams:
 
 [//]: # (* MiniStream)
 
-Extensions:
+Extensions
 
-* shareDistinctValue
-* shareDistinctValueSeeded
-* publishDistinctValue
-* publishDistinctValueSeeded
+* on Stream:
+  * publishDistinctValue
+  * publishDistinctValueSeeded
+  * shareDistinctValue
+  * shareDistinctValueSeeded
+  * mapDistinctValue\<T>
+  * takeUntilFuture
+
+* on Iterable:
+  * parseList\<T>
+  * parseIterable\<T>
+
+* on Function:
+  * apply
 
 ## Getting started
 

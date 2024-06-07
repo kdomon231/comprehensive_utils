@@ -1,4 +1,9 @@
-## 0.6.4
+## 0.6.5
+
+* Added `mapDistinctValue<T>` Stream extension
+* Improved documentation and README
+
+* ## 0.6.4
 
 * Added `IndexingCollection<T>`
 * Improved documentation
