@@ -52,4 +52,7 @@ class DistinctValueConnectableStream<T>
 
   @override
   StackTrace? get stackTrace => _subject.stackTrace;
+
+  @override
+  StreamNotification<T>? get lastEventOrNull => _subject.lastEventOrNull;
 }

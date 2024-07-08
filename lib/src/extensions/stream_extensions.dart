@@ -64,7 +64,7 @@ extension StreamDistinctExtensions<T> on Stream<T> {
   ///
   /// Returns a `DistinctValueStream` that emits distinct values of type [R], and automatically
   /// manages the subscription and cancellation of the underlying stream.
-  DistinctValueStream<R> mapDistinctValue<R>(R Function(T value) convert,
+  DistinctValueStream<R> mapDistinctValue<R>(R Function(T event) convert,
       [bool Function(R, R)? equals]) {
     if (this case final ValueStream<T> stream when stream.hasValue) {
       return DistinctValueConnectableStream<R>.seeded(

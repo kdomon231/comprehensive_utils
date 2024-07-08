@@ -125,6 +125,23 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
   StackTrace? get stackTrace => _wrapper.errorAndStackTrace?.stackTrace;
 
   @override
+  StreamNotification<T>? get lastEventOrNull {
+    // data event
+    if (_wrapper.isValue) {
+      return StreamNotification.data(_wrapper.value as T);
+    }
+
+    // error event
+    final errorAndSt = _wrapper.errorAndStackTrace;
+    if (errorAndSt != null) {
+      return ErrorNotification(errorAndSt);
+    }
+
+    // no event
+    return null;
+  }
+
+  @override
   void add(T event) {
     if (_wrapper.isAddingStreamItems) {
       throw StateError(
@@ -261,6 +278,9 @@ class _DistinctSubjectStream<T> extends Stream<T>
 
   @override
   T? get valueOrNull => _subject.valueOrNull;
+
+  @override
+  StreamNotification<T>? get lastEventOrNull => _subject.lastEventOrNull;
 }
 
 abstract class DistinctValueStream<T> implements ValueStream<T> {}
