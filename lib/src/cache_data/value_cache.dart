@@ -12,11 +12,10 @@ class ValueCache<T> {
   ///
   /// The `timeToLive` parameter specifies how long the cached value should be
   /// kept before it is invalidated.
-  ValueCache(this._timeToLive) {
-    _timer = RestartableTimer(_timeToLive, invalidate)..cancel();
+  ValueCache(Duration timeToLive) {
+    _timer = RestartableTimer(timeToLive, invalidate)..cancel();
   }
 
-  final Duration _timeToLive;
   late final RestartableTimer _timer;
   FutureOr<T>? _cachedValueFuture;
 

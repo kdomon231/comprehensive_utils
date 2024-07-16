@@ -44,6 +44,7 @@ linter:
     # - unreachable_from_main
     - use_raw_strings
     # - use_string_in_part_of_directives
+    - annotate_redeclares
 
     # these rules are documented on and in the same order as
     # the Dart Lint rules page to make maintenance easier

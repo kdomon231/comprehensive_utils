@@ -1,10 +1,10 @@
 name: comprehensive_utils
 description: A collection of classes and functions containing simple and complex performance-oriented tools
-version: 0.6.6
+version: 0.6.7
 repository: https://github.com/kdomon231/comprehensive_utils
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.3.0 <4.0.0'
   flutter: ">=1.17.0"
 
 dependencies:
@@ -17,6 +17,7 @@ dependencies:
   async_builder: ^1.3.1+1
   nil: ^1.1.1
   collection: ^1.18.0
+  meta: ^1.12.0
 
 dev_dependencies:
   flutter_test:

@@ -1,3 +1,9 @@
+## 0.6.7
+
+* Added `Lazy<T>`
+* Added extension types representing specific numeric types, e.g. byte.
+* Requires Dart >=3.3.0
+
 ## 0.6.6
 
 * Bumped dependencies (allow rxdart: ^0.28)
