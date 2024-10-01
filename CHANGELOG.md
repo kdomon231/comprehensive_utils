@@ -1,3 +1,7 @@
+## 0.6.8
+
+* Added (syntactic sugar) extensions `onSuccess()` and `onFailure()` to `Future<bool>`
+
 ## 0.6.7
 
 * Added `Lazy<T>`
