@@ -11,6 +11,7 @@ export 'src/data_types/integers/uint.dart';
 export 'src/data_types/integers/ulong.dart';
 export 'src/data_types/integers/ushort.dart';
 export 'src/extensions/function_extensions.dart';
+export 'src/extensions/future_extensions.dart';
 export 'src/extensions/json_parse_extensions.dart';
 export 'src/extensions/stream_extensions.dart';
 export 'src/streams/distinct_connectable_stream.dart';

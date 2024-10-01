@@ -1,4 +1,4 @@
-## 0.6.8
+## 0.6.9
 
 * Added (syntactic sugar) extensions `onSuccess()` and `onFailure()` to `Future<bool>`
 
