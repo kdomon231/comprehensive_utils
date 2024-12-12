@@ -1,3 +1,7 @@
+## 0.6.10
+
+* Bumped dependencies
+
 ## 0.6.9
 
 * Added (syntactic sugar) extensions `onSuccess()` and `onFailure()` to `Future<bool>`
