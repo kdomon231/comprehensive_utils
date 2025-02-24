@@ -1,3 +1,7 @@
+## 0.6.11
+
+* Minor changes in numeric data types
+
 ## 0.6.10
 
 * Bumped dependencies

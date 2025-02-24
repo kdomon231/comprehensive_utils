@@ -17,6 +17,12 @@ extension type const Byte._(int value) implements UnsignedInteger {
   @redeclare
   Byte operator +(int other) => Byte(value + other);
 
+  /// Subtracts the given [other] value from this [Byte] and returns the result.
+  ///
+  /// If the result is less than 0, it will be truncated to unsigned 8-bit integer.
+  @redeclare
+  Byte operator -(int other) => Byte(value - other);
+
   /// Returns the bitwise negation of this [Byte].
   ///
   /// This is equivalent to performing a bitwise NOT operation on the underlying

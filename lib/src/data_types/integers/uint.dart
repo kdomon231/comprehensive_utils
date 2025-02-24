@@ -9,17 +9,23 @@ extension type const UInt._(int value) implements UnsignedInteger {
   /// Constructs a [UInt] from an [int] value.
   ///
   /// If the value is negative, it will be converted to its 32-bit unsigned representation.
+  /// If the value is greater than 2^32 - 1, it will be truncated to 32 bits.
   UInt([int value = 0]) : value = value.toUnsigned(32);
 
-  /// Adds the given [other] value to this [UInt] and returns the result.
+  /// Returns the sum of this [UInt] and the given [other] value.
   ///
-  /// If the result is greater than the maximum 32-bit unsigned integer, it will be truncated to unsigned 64-bit integer.
+  /// The result is also an unsigned 32-bit integer.
   @redeclare
   UInt operator +(int other) => UInt(value + other);
 
-  /// Returns the bitwise negation of this [UInt].
+  /// Returns the difference of this [UInt] and the given [other] value.
   ///
-  /// This is equivalent to performing a bitwise NOT operation on the underlying
-  /// unsigned 32-bit integer.
+  /// The result is also an unsigned 32-bit integer.
+  @redeclare
+  UInt operator -(int other) => UInt(value - other);
+
+  /// Returns the bitwise NOT of this [UInt].
+  ///
+  /// The result is also an unsigned 32-bit integer.
   UInt operator ~() => UInt(~value);
 }

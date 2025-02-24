@@ -17,6 +17,12 @@ extension type const ULong._(int value) implements UnsignedInteger {
   @redeclare
   ULong operator +(int other) => ULong(value + other);
 
+  /// Subtracts the given [other] value from this [ULong] and returns the result.
+  ///
+  /// If the result is less than 0, it will be truncated to unsigned 64-bit integer.
+  @redeclare
+  ULong operator -(int other) => ULong(value - other);
+
   /// Returns the bitwise negation of this [ULong].
   ///
   /// This is equivalent to performing a bitwise NOT operation on the underlying

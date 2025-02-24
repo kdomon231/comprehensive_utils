@@ -8,18 +8,23 @@ import 'package:meta/meta.dart';
 extension type const UShort._(int value) implements UnsignedInteger {
   /// Constructs a [UShort] from an [int] value.
   ///
-  /// If the value is greater than 65535, it will be truncated to unsigned 16-bit integer.
+  /// If the value is negative or greater than 65535, it will be converted to its 16-bit unsigned representation.
   UShort([int value = 0]) : value = value.toUnsigned(16);
 
-  /// Adds the given [other] value to this [UShort] and returns the result.
+  /// Returns the sum of this [UShort] and the given [other] value.
   ///
-  /// If the result is greater than 65535, it will be truncated to unsigned 16-bit integer.
+  /// The result is also a [UShort] and is calculated by adding the underlying integer values.
   @redeclare
   UShort operator +(int other) => UShort(value + other);
 
+  /// Returns the difference of this [UShort] and the given [other] value.
+  ///
+  /// The result is also a [UShort] and is calculated by subtracting the underlying integer values.
+  @redeclare
+  UShort operator -(int other) => UShort(value - other);
+
   /// Returns the bitwise negation of this [UShort].
   ///
-  /// This is equivalent to performing a bitwise NOT operation on the underlying
-  /// unsigned 16-bit integer.
+  /// This is equivalent to performing a bitwise NOT operation on the underlying integer value.
   UShort operator ~() => UShort(~value);
 }
