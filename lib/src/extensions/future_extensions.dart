@@ -1,7 +1,7 @@
-import 'package:flutter/services.dart';
+import 'dart:async';
 
 /// Extension on [Future<bool>] that provides methods for handling boolean results.
-extension OnBooleanResult on Future<bool> {
+extension OnBooleanResult on Future<bool?> {
   /// Calls the provided [callback] if the future completes with `true`.
   ///
   /// This method is useful for handling the success case of a boolean future.
@@ -13,9 +13,9 @@ extension OnBooleanResult on Future<bool> {
   ///   print('Success!');
   /// });
   /// ```
-  Future<void> onSuccess(VoidCallback callback) async {
-    if (await this) {
-      callback.call();
+  Future<void> onSuccess(FutureOr<void> Function() callback) async {
+    if (await this == true) {
+      await callback.call();
     }
   }
 
@@ -30,9 +30,9 @@ extension OnBooleanResult on Future<bool> {
   ///   print('Failure!');
   /// });
   /// ```
-  Future<void> onFailure(VoidCallback callback) async {
-    if (!(await this)) {
-      callback.call();
+  Future<void> onFailure(FutureOr<void> Function() callback) async {
+    if (await this == false) {
+      await callback.call();
     }
   }
 }

@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:async_builder/async_builder.dart';
-import 'package:async_builder/init_builder.dart';
 import 'package:collection/collection.dart';
 import 'package:comprehensive_utils/comprehensive_utils.dart';
+import 'package:comprehensive_utils/src/common/typedefs.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -35,7 +34,7 @@ class FluentListView<T> extends StatelessWidget {
     this.pause = false,
     this.silent,
     this.keepAlive = false,
-    this.reportError,
+    this.reportError = FlutterError.reportError,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.controller,
@@ -64,16 +63,16 @@ class FluentListView<T> extends StatelessWidget {
         );
 
   final Stream<Iterable<T>> _stream;
-  final Widget Function(BuildContext context) waiting;
+  final WidgetBuilder waiting;
   final Widget Function(BuildContext context, int index, T? value) itemBuilder;
-  final Widget Function(BuildContext context, Object, StackTrace?) error;
-  final Widget Function(BuildContext context, IList<T>?) closed;
+  final ErrorBuilderFn error;
+  final WidgetValueBuilder<IList<T>> closed;
   final IList<T> initial;
   final bool retain;
   final bool pause;
   final bool? silent;
   final bool keepAlive;
-  final void Function(FlutterErrorDetails)? reportError;
+  final ErrorReporterFn reportError;
   final Axis scrollDirection;
   final bool reverse;
   final ScrollController? controller;
@@ -116,7 +115,7 @@ class FluentListView<T> extends StatelessWidget {
           skipRestoration = retain && list2.length < list1.length;
           return _equality(list1, list2, itemEquality: itemComparator);
         }),
-        builder: (context, value) => _ListViewBase(
+        builder: (context, value, _) => _ListViewBase(
           itemCount: value!.length,
           scrollDirection: scrollDirection,
           reverse: reverse,
@@ -143,7 +142,7 @@ class FluentListView<T> extends StatelessWidget {
               silent: true,
               keepAlive: keepAlive,
               stream: stream.map((event) => event[index]).shareDistinctValue(),
-              builder: (context, item) => itemBuilder(context, index, item),
+              builder: (context, item, _) => itemBuilder(context, index, item),
             ),
             findChildIndexCallback: (key) {
               if (skipRestoration) {
@@ -211,7 +210,8 @@ class FluentListView<T> extends StatelessWidget {
 
   static Widget _nilWaiting(BuildContext _) => const Nil();
 
-  static Widget _nilClosed(BuildContext _, Object? __) => const Nil();
+  static Widget _nilClosed(BuildContext _, Object? __, Widget? ___) =>
+      const Nil();
 
   static Widget _nilError(BuildContext _, Object __, StackTrace? ___) =>
       const Nil();
@@ -287,6 +287,7 @@ class _DistinctBuilder<T> extends AsyncBuilder<T> {
     super.silent,
     super.keepAlive,
     super.reportError,
+    super.child,
     super.key,
   });
 
@@ -325,16 +326,15 @@ class _DistinctBuilderState<T> extends State<_DistinctBuilder<T>>
       widget.reportError(
         FlutterErrorDetails(
           exception: error,
-          stack: stackTrace ?? StackTrace.empty,
-          context: ErrorDescription('While updating AsyncBuilder'),
+          stack: stackTrace,
+          context: ErrorDescription('While updating _DistinctBuilder'),
         ),
       );
     }
   }
 
   void _updatePause() {
-    final subscription = _subscription;
-    if (subscription != null) {
+    if (_subscription case final subscription?) {
       if (widget.pause) {
         if (!subscription.isPaused) {
           subscription.pause();
@@ -345,10 +345,9 @@ class _DistinctBuilderState<T> extends State<_DistinctBuilder<T>>
     }
   }
 
-  void _initStream() {
+  void _initStream(Stream<T> stream) {
     _cancel();
-    final Stream<T> stream = widget.stream!;
-    var skipFirst = false;
+    bool skipFirst = false;
     if (stream is ValueStream<T> && stream.hasValue) {
       skipFirst = true;
       _hasFired = true;
@@ -382,8 +381,8 @@ class _DistinctBuilderState<T> extends State<_DistinctBuilder<T>>
   void initState() {
     super.initState();
 
-    if (widget.stream != null) {
-      _initStream();
+    if (widget.stream case final stream?) {
+      _initStream(stream);
       _updatePause();
     }
   }
@@ -392,10 +391,12 @@ class _DistinctBuilderState<T> extends State<_DistinctBuilder<T>>
   void didUpdateWidget(_DistinctBuilder<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.stream == null) {
+    if (widget.stream case final stream?) {
+      if (stream != oldWidget.stream) {
+        _initStream(stream);
+      }
+    } else {
       _cancel();
-    } else if (widget.stream != oldWidget.stream) {
-      _initStream();
     }
 
     _updatePause();
@@ -410,14 +411,16 @@ class _DistinctBuilderState<T> extends State<_DistinctBuilder<T>>
     }
 
     if (_isClosed && widget.closed != null) {
-      return widget.closed!(context, _hasFired ? _lastValue : widget.initial);
+      return widget.closed!(
+          context, _hasFired ? _lastValue : widget.initial, widget.child);
     }
 
     if (!_hasFired && widget.waiting != null) {
       return widget.waiting!(context);
     }
 
-    return widget.builder(context, _hasFired ? _lastValue : widget.initial);
+    return widget.builder(
+        context, _hasFired ? _lastValue : widget.initial, widget.child);
   }
 
   @override

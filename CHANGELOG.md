@@ -1,3 +1,7 @@
+## 0.6.12
+
+* Added `AsyncBuilder` and `InitBuilder`, modified versions based on https://pub.dev/packages/async_builder.
+
 ## 0.6.11
 
 * Minor changes in numeric data types
