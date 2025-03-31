@@ -8,7 +8,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:rxdart/src/transformers/start_with_error.dart';
 import 'package:rxdart/src/utils/empty.dart';
 
-class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
+class DistinctSubject<T> extends Subject<T>
+    implements BehaviorSubject<T>, DistinctValueStream<T> {
   factory DistinctSubject({
     void Function()? onListen,
     void Function()? onCancel,
@@ -25,7 +26,7 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
 
     return DistinctSubject<T>._(
       controller,
-      Rx.defer<T>(_deferStream(wrapper, controller, sync), reusable: true),
+      Rx.defer<T>(_deferStream(wrapper, controller), reusable: true),
       wrapper,
     );
   }
@@ -53,7 +54,7 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
 
     return DistinctSubject<T>._(
       controller,
-      Rx.defer<T>(_deferStream(wrapper, controller, sync), reusable: true),
+      Rx.defer<T>(_deferStream(wrapper, controller), reusable: true),
       wrapper,
     );
   }
@@ -64,7 +65,6 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
   static Stream<T> Function() _deferStream<T>(
     _Wrapper<T> wrapper,
     StreamController<T> controller,
-    bool sync,
   ) =>
       () {
         final errorAndStackTrace = wrapper.errorAndStackTrace;
@@ -104,6 +104,7 @@ class DistinctSubject<T> extends Subject<T> implements DistinctValueStream<T> {
     throw ValueStreamError.hasNoValue();
   }
 
+  @override
   set value(T newValue) => add(newValue);
 
   @override
