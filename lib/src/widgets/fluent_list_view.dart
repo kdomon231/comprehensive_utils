@@ -17,13 +17,13 @@ import 'package:rxdart/rxdart.dart';
 /// A FluentListView widget is a widget that displays a scrolling, linear list of elements.
 /// It listens to a stream of iterable of type T and builds the list based on the elements in the stream.
 /// The widget supports various configuration options such as waiting, error, closed, initial, retain, pause, silent, keepAlive, reportError, scrollDirection, reverse, controller, primary, physics, shrinkWrap, padding, itemExtent, prototypeItem, addAutomaticKeepAlives, addRepaintBoundaries, addSemanticIndexes, cacheExtent, dragStartBehavior, keyboardDismissBehavior, restorationId, clipBehavior, itemComparator, and ignoreOrder.
-class FluentListView<T> extends StatelessWidget {
+sealed class FluentListView<T> extends StatefulWidget {
   /// Creates a FluentListView widget.
   ///
   /// The [stream] parameter is required and specifies the stream of iterable of type T.
   /// The [itemBuilder] parameter is required and specifies the builder for each item in the list.
   /// The other parameters are optional and provide various configuration options for the widget.
-  const FluentListView({
+  const FluentListView._({
     required Stream<Iterable<T>> stream,
     required this.itemBuilder,
     this.waiting = _nilWaiting,
@@ -44,7 +44,7 @@ class FluentListView<T> extends StatelessWidget {
     this.padding,
     this.itemExtent,
     this.prototypeItem,
-    this.addAutomaticKeepAlives = true,
+    this.addAutomaticKeepAlive = true,
     this.addRepaintBoundaries = true,
     this.addSemanticIndexes = true,
     this.cacheExtent,
@@ -62,9 +62,81 @@ class FluentListView<T> extends StatelessWidget {
           'You can only pass itemExtent or prototypeItem, not both.',
         );
 
+  // ignore: sort_unnamed_constructors_first
+  const factory FluentListView({
+    required Stream<Iterable<T>> stream,
+    required IndexedListItemBuilder<T> itemBuilder,
+    WidgetBuilder waiting,
+    ErrorBuilderFn error,
+    WidgetValueBuilder<IList<T>> closed,
+    IList<T> initial,
+    bool retain,
+    bool pause,
+    bool? silent,
+    bool keepAlive,
+    ErrorReporterFn reportError,
+    Axis scrollDirection,
+    bool reverse,
+    ScrollController? controller,
+    bool? primary,
+    ScrollPhysics? physics,
+    bool shrinkWrap,
+    EdgeInsetsGeometry? padding,
+    double? itemExtent,
+    Widget? prototypeItem,
+    bool addAutomaticKeepAlive,
+    bool addRepaintBoundaries,
+    bool addSemanticIndexes,
+    double? cacheExtent,
+    DragStartBehavior dragStartBehavior,
+    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior,
+    String? restorationId,
+    Clip clipBehavior,
+    bool Function(T, T)? itemComparator,
+    bool ignoreOrder,
+    Key? key,
+  }) = _FluentListView<T>;
+
+  const factory FluentListView.paged({
+    required Stream<Iterable<T>> stream,
+    required IndexedListItemBuilder<T> itemBuilder,
+    required Future<bool> Function(int pageNumber, int pageSize) loadNextPage,
+    Positioned loadingIndicator,
+    int pageSize,
+    WidgetBuilder waiting,
+    ErrorBuilderFn error,
+    WidgetValueBuilder<IList<T>> closed,
+    IList<T> initial,
+    bool retain,
+    bool pause,
+    bool? silent,
+    bool keepAlive,
+    ErrorReporterFn reportError,
+    Axis scrollDirection,
+    bool reverse,
+    ScrollController? controller,
+    bool? primary,
+    ScrollPhysics? physics,
+    bool shrinkWrap,
+    EdgeInsetsGeometry? padding,
+    double? itemExtent,
+    Widget? prototypeItem,
+    bool addAutomaticKeepAlive,
+    bool addRepaintBoundaries,
+    bool addSemanticIndexes,
+    double? cacheExtent,
+    DragStartBehavior dragStartBehavior,
+    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior,
+    String? restorationId,
+    Clip clipBehavior,
+    bool Function(T, T)? itemComparator,
+    bool ignoreOrder,
+    Key? key,
+  }) = _PagedFluentListView<T>;
+
   final Stream<Iterable<T>> _stream;
+  final IndexedListItemBuilder<T> itemBuilder;
   final WidgetBuilder waiting;
-  final Widget Function(BuildContext context, int index, T? value) itemBuilder;
   final ErrorBuilderFn error;
   final WidgetValueBuilder<IList<T>> closed;
   final IList<T> initial;
@@ -82,7 +154,7 @@ class FluentListView<T> extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final double? itemExtent;
   final Widget? prototypeItem;
-  final bool addAutomaticKeepAlives;
+  final bool addAutomaticKeepAlive;
   final bool addRepaintBoundaries;
   final bool addSemanticIndexes;
   final double? cacheExtent;
@@ -93,74 +165,6 @@ class FluentListView<T> extends StatelessWidget {
   final bool Function(T, T)? itemComparator;
   final bool Function(IList<T>, IList<T>, {bool Function(T, T)? itemEquality})
       _equality;
-
-  @override
-  Widget build(BuildContext context) {
-    // probably bug in SliverChildBuilderDelegate, temporary solution
-    bool skipRestoration = false;
-    return InitBuilder.arg<Stream<IList<T>>, Stream<Iterable<T>>>(
-      getter: _getMappedStream<T>,
-      arg: _stream,
-      builder: (context, stream) => _DistinctBuilder<IList<T>>(
-        waiting: waiting,
-        error: error,
-        closed: closed,
-        initial: initial,
-        retain: retain,
-        pause: pause,
-        silent: silent,
-        keepAlive: keepAlive,
-        reportError: reportError,
-        stream: stream!.shareDistinctValue((list1, list2) {
-          skipRestoration = retain && list2.length < list1.length;
-          return _equality(list1, list2, itemEquality: itemComparator);
-        }),
-        builder: (context, value, _) => _ListViewBase(
-          itemCount: value!.length,
-          scrollDirection: scrollDirection,
-          reverse: reverse,
-          controller: controller,
-          primary: primary,
-          physics: physics,
-          shrinkWrap: shrinkWrap,
-          padding: padding,
-          itemExtent: itemExtent,
-          prototypeItem: prototypeItem,
-          cacheExtent: cacheExtent,
-          dragStartBehavior: dragStartBehavior,
-          keyboardDismissBehavior: keyboardDismissBehavior,
-          restorationId: restorationId,
-          clipBehavior: clipBehavior,
-          childrenDelegate: SliverChildBuilderDelegate(
-            (context, index) => _DistinctBuilder<T>(
-              key: ValueKey<T>(value[index]),
-              waiting: _nilWaiting,
-              error: _nilError,
-              closed: _nilClosed,
-              retain: retain,
-              pause: pause,
-              silent: true,
-              keepAlive: keepAlive,
-              stream: stream.map((event) => event[index]).shareDistinctValue(),
-              builder: (context, item, _) => itemBuilder(context, index, item),
-            ),
-            findChildIndexCallback: (key) {
-              if (skipRestoration) {
-                return null;
-              }
-              final index = value
-                  .indexWhere((item) => item == (key as ValueKey<T>).value);
-              return index == -1 ? null : index;
-            },
-            childCount: value.length,
-            addAutomaticKeepAlives: addAutomaticKeepAlives,
-            addRepaintBoundaries: addRepaintBoundaries,
-            addSemanticIndexes: addSemanticIndexes,
-          ),
-        ),
-      ),
-    );
-  }
 
   static bool _equals<T>(
     IList<T> list1,
@@ -215,15 +219,246 @@ class FluentListView<T> extends StatelessWidget {
 
   static Widget _nilError(BuildContext _, Object __, StackTrace? ___) =>
       const Nil();
+
+  @override
+  State<FluentListView<T>> createState() =>
+      _FluentListViewState<T, FluentListView<T>>();
 }
 
-const ConfigList _defaultListConfig =
-    ConfigList(isDeepEquals: true, cacheHashCode: true);
+class _FluentListViewState<T, S extends FluentListView<T>> extends State<S> {
+  late final ValueStream<IList<T>> stream;
+  ScrollController? controller;
 
-Stream<IList<T>> _getMappedStream<T>(Stream<Iterable<T>> baseStream) =>
-    baseStream.map(
-      (event) => event.toIList(_defaultListConfig),
+  @override
+  void initState() {
+    super.initState();
+    controller = widget.controller;
+    stream = widget._stream
+        .map((event) => event
+            .toIList(const ConfigList(isDeepEquals: true, cacheHashCode: true)))
+        .shareValue();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // probably bug in SliverChildBuilderDelegate, temporary solution
+    bool skipRestoration = false;
+    return _DistinctBuilder<IList<T>>(
+      waiting: widget.waiting,
+      error: widget.error,
+      closed: widget.closed,
+      initial: widget.initial,
+      retain: widget.retain,
+      pause: widget.pause,
+      silent: widget.silent,
+      keepAlive: widget.keepAlive,
+      reportError: widget.reportError,
+      stream: stream.shareDistinctValue((list1, list2) {
+        skipRestoration = widget.retain && list2.length < list1.length;
+        return widget._equality(list1, list2,
+            itemEquality: widget.itemComparator);
+      }),
+      builder: (context, value, _) => _ListViewBase(
+        itemCount: value!.length,
+        scrollDirection: widget.scrollDirection,
+        reverse: widget.reverse,
+        controller: controller,
+        primary: widget.primary,
+        physics: widget.physics,
+        shrinkWrap: widget.shrinkWrap,
+        padding: widget.padding,
+        itemExtent: widget.itemExtent,
+        prototypeItem: widget.prototypeItem,
+        cacheExtent: widget.cacheExtent,
+        dragStartBehavior: widget.dragStartBehavior,
+        keyboardDismissBehavior: widget.keyboardDismissBehavior,
+        restorationId: widget.restorationId,
+        clipBehavior: widget.clipBehavior,
+        childrenDelegate: SliverChildBuilderDelegate(
+          (context, index) => _DistinctBuilder<T>(
+            key: ValueKey<T>(value[index]),
+            waiting: FluentListView._nilWaiting,
+            error: FluentListView._nilError,
+            closed: FluentListView._nilClosed,
+            retain: widget.retain,
+            pause: widget.pause,
+            silent: true,
+            keepAlive: widget.keepAlive,
+            stream: stream.map((event) => event[index]).shareDistinctValue(),
+            builder: (context, item, _) =>
+                widget.itemBuilder(context, index, item),
+          ),
+          findChildIndexCallback: (key) {
+            if (skipRestoration) {
+              return null;
+            }
+            final index =
+                value.indexWhere((item) => item == (key as ValueKey<T>).value);
+            return index == -1 ? null : index;
+          },
+          childCount: value.length,
+          addAutomaticKeepAlives: widget.addAutomaticKeepAlive,
+          addRepaintBoundaries: widget.addRepaintBoundaries,
+          addSemanticIndexes: widget.addSemanticIndexes,
+        ),
+      ),
     );
+  }
+}
+
+final class _FluentListView<T> extends FluentListView<T> {
+  const _FluentListView({
+    required super.stream,
+    required super.itemBuilder,
+    super.waiting,
+    super.error,
+    super.closed,
+    super.initial,
+    super.retain,
+    super.pause,
+    super.silent,
+    super.keepAlive,
+    super.reportError,
+    super.scrollDirection,
+    super.reverse,
+    super.controller,
+    super.primary,
+    super.physics,
+    super.shrinkWrap,
+    super.padding,
+    super.itemExtent,
+    super.prototypeItem,
+    super.addAutomaticKeepAlive,
+    super.addRepaintBoundaries,
+    super.addSemanticIndexes,
+    super.cacheExtent,
+    super.dragStartBehavior,
+    super.keyboardDismissBehavior,
+    super.restorationId,
+    super.clipBehavior,
+    super.itemComparator,
+    super.ignoreOrder,
+    super.key,
+  }) : super._();
+}
+
+final class _PagedFluentListView<T> extends FluentListView<T> {
+  const _PagedFluentListView({
+    required super.stream,
+    required super.itemBuilder,
+    required this.loadNextPage,
+    this.loadingIndicator = _defaultLoadingIndicator,
+    this.loadingScrollOffset = 0,
+    this.pageSize = 20,
+    super.waiting,
+    super.error,
+    super.closed,
+    super.initial,
+    super.retain,
+    super.pause,
+    super.silent,
+    super.keepAlive,
+    super.reportError,
+    super.scrollDirection,
+    super.reverse,
+    super.controller,
+    super.primary,
+    super.physics,
+    super.shrinkWrap,
+    super.padding,
+    super.itemExtent,
+    super.prototypeItem,
+    super.addAutomaticKeepAlive,
+    super.addRepaintBoundaries,
+    super.addSemanticIndexes,
+    super.cacheExtent,
+    super.dragStartBehavior,
+    super.keyboardDismissBehavior,
+    super.restorationId,
+    super.clipBehavior,
+    super.itemComparator,
+    super.ignoreOrder,
+    super.key,
+  }) : super._();
+
+  final Future<bool> Function(int pageNumber, int pageSize) loadNextPage;
+  final Positioned loadingIndicator;
+  final double loadingScrollOffset;
+  final int pageSize;
+
+  @override
+  State<_PagedFluentListView<T>> createState() =>
+      _PagedFluentListViewState<T>();
+
+  static const Positioned _defaultLoadingIndicator = Positioned(
+    bottom: 16,
+    left: 0,
+    right: 0,
+    child: SizedBox(
+      height: 50,
+      child: Center(child: CircularProgressIndicator()),
+    ),
+  );
+}
+
+final class _PagedFluentListViewState<T>
+    extends _FluentListViewState<T, _PagedFluentListView<T>> {
+  final ValueNotifier<bool> loadingNotifier = ValueNotifier<bool>(false);
+  late final ScrollController _controller;
+  int pageNumber = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = controller ??= ScrollController();
+    _controller.addListener(_onScroll);
+    _load();
+  }
+
+  void _onScroll() {
+    if (_controller.position.hasReachedPosition(widget.loadingScrollOffset) &&
+        !loadingNotifier.value) {
+      loadingNotifier.value = true;
+      _load();
+    }
+  }
+
+  Future<void> _load() async {
+    if (await widget.loadNextPage(pageNumber, widget.pageSize)) {
+      pageNumber++;
+    }
+    loadingNotifier.value = false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        super.build(context),
+        ValueListenableBuilder<bool>(
+          valueListenable: loadingNotifier,
+          child: widget.loadingIndicator,
+          builder: (_, value, child) =>
+              value ? child! : const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onScroll);
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
+    loadingNotifier.dispose();
+    super.dispose();
+  }
+}
+
+extension on ScrollPosition {
+  bool hasReachedPosition(double offset) => pixels >= maxScrollExtent - offset;
+}
 
 class _ListViewBase extends BoxScrollView {
   const _ListViewBase({

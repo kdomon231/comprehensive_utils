@@ -1,3 +1,7 @@
+## 0.6.14
+
+* Added `FluentListView<T>.paged`
+
 ## 0.6.13
 
 * Minor change in `DistinctSubject<T>`

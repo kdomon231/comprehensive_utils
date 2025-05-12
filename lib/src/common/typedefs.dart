@@ -13,3 +13,6 @@ typedef ErrorBuilderFn = Widget Function(
 
 /// Signature for a function that reports a flutter error, e.g. [FlutterError.reportError].
 typedef ErrorReporterFn = void Function(FlutterErrorDetails details);
+
+typedef IndexedListItemBuilder<T> = Widget Function(
+    BuildContext context, int index, T? value);
