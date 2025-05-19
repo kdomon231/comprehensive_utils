@@ -16,53 +16,12 @@ import 'package:rxdart/rxdart.dart';
 
 /// A FluentListView widget is a widget that displays a scrolling, linear list of elements.
 /// It listens to a stream of iterable of type T and builds the list based on the elements in the stream.
-/// The widget supports various configuration options such as waiting, error, closed, initial, retain, pause, silent, keepAlive, reportError, scrollDirection, reverse, controller, primary, physics, shrinkWrap, padding, itemExtent, prototypeItem, addAutomaticKeepAlives, addRepaintBoundaries, addSemanticIndexes, cacheExtent, dragStartBehavior, keyboardDismissBehavior, restorationId, clipBehavior, itemComparator, and ignoreOrder.
 sealed class FluentListView<T> extends StatefulWidget {
   /// Creates a FluentListView widget.
   ///
   /// The [stream] parameter is required and specifies the stream of iterable of type T.
   /// The [itemBuilder] parameter is required and specifies the builder for each item in the list.
   /// The other parameters are optional and provide various configuration options for the widget.
-  const FluentListView._({
-    required Stream<Iterable<T>> stream,
-    required this.itemBuilder,
-    this.waiting = _nilWaiting,
-    this.error = _nilError,
-    this.closed = _nilClosed,
-    this.initial = const IListConst([]),
-    this.retain = false,
-    this.pause = false,
-    this.silent,
-    this.keepAlive = false,
-    this.reportError = FlutterError.reportError,
-    this.scrollDirection = Axis.vertical,
-    this.reverse = false,
-    this.controller,
-    this.primary,
-    this.physics,
-    this.shrinkWrap = false,
-    this.padding,
-    this.itemExtent,
-    this.prototypeItem,
-    this.addAutomaticKeepAlive = true,
-    this.addRepaintBoundaries = true,
-    this.addSemanticIndexes = true,
-    this.cacheExtent,
-    this.dragStartBehavior = DragStartBehavior.start,
-    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
-    this.restorationId,
-    this.clipBehavior = Clip.hardEdge,
-    this.itemComparator,
-    bool ignoreOrder = false,
-    super.key,
-  })  : _stream = stream,
-        _equality = ignoreOrder ? _equalsUnordered<T> : _equals<T>,
-        assert(
-          itemExtent == null || prototypeItem == null,
-          'You can only pass itemExtent or prototypeItem, not both.',
-        );
-
-  // ignore: sort_unnamed_constructors_first
   const factory FluentListView({
     required Stream<Iterable<T>> stream,
     required IndexedListItemBuilder<T> itemBuilder,
@@ -84,7 +43,7 @@ sealed class FluentListView<T> extends StatefulWidget {
     EdgeInsetsGeometry? padding,
     double? itemExtent,
     Widget? prototypeItem,
-    bool addAutomaticKeepAlive,
+    bool addAutomaticKeepAlives,
     bool addRepaintBoundaries,
     bool addSemanticIndexes,
     double? cacheExtent,
@@ -102,6 +61,7 @@ sealed class FluentListView<T> extends StatefulWidget {
     required IndexedListItemBuilder<T> itemBuilder,
     required Future<bool> Function(int pageNumber, int pageSize) loadNextPage,
     Positioned loadingIndicator,
+    double loadingScrollOffset,
     int pageSize,
     WidgetBuilder waiting,
     ErrorBuilderFn error,
@@ -121,7 +81,7 @@ sealed class FluentListView<T> extends StatefulWidget {
     EdgeInsetsGeometry? padding,
     double? itemExtent,
     Widget? prototypeItem,
-    bool addAutomaticKeepAlive,
+    bool addAutomaticKeepAlives,
     bool addRepaintBoundaries,
     bool addSemanticIndexes,
     double? cacheExtent,
@@ -133,6 +93,45 @@ sealed class FluentListView<T> extends StatefulWidget {
     bool ignoreOrder,
     Key? key,
   }) = _PagedFluentListView<T>;
+
+  const FluentListView._({
+    required Stream<Iterable<T>> stream,
+    required this.itemBuilder,
+    this.waiting = _nilWaiting,
+    this.error = _nilError,
+    this.closed = _nilClosed,
+    this.initial = const IListConst([]),
+    this.retain = false,
+    this.pause = false,
+    this.silent,
+    this.keepAlive = false,
+    this.reportError = FlutterError.reportError,
+    this.scrollDirection = Axis.vertical,
+    this.reverse = false,
+    this.controller,
+    this.primary,
+    this.physics,
+    this.shrinkWrap = false,
+    this.padding,
+    this.itemExtent,
+    this.prototypeItem,
+    this.addAutomaticKeepAlives = true,
+    this.addRepaintBoundaries = true,
+    this.addSemanticIndexes = true,
+    this.cacheExtent,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+    this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
+    this.itemComparator,
+    bool ignoreOrder = false,
+    super.key,
+  })  : _stream = stream,
+        _equality = ignoreOrder ? _equalsUnordered<T> : _equals<T>,
+        assert(
+          itemExtent == null || prototypeItem == null,
+          'You can only pass itemExtent or prototypeItem, not both.',
+        );
 
   final Stream<Iterable<T>> _stream;
   final IndexedListItemBuilder<T> itemBuilder;
@@ -154,7 +153,7 @@ sealed class FluentListView<T> extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
   final double? itemExtent;
   final Widget? prototypeItem;
-  final bool addAutomaticKeepAlive;
+  final bool addAutomaticKeepAlives;
   final bool addRepaintBoundaries;
   final bool addSemanticIndexes;
   final double? cacheExtent;
@@ -233,10 +232,9 @@ class _FluentListViewState<T, S extends FluentListView<T>> extends State<S> {
   void initState() {
     super.initState();
     controller = widget.controller;
-    stream = widget._stream
-        .map((event) => event
-            .toIList(const ConfigList(isDeepEquals: true, cacheHashCode: true)))
-        .shareValue();
+    controller = widget.controller;
+    const config = ConfigList(isDeepEquals: true, cacheHashCode: true);
+    stream = widget._stream.map((event) => event.toIList(config)).shareValue();
   }
 
   @override
@@ -297,7 +295,7 @@ class _FluentListViewState<T, S extends FluentListView<T>> extends State<S> {
             return index == -1 ? null : index;
           },
           childCount: value.length,
-          addAutomaticKeepAlives: widget.addAutomaticKeepAlive,
+          addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
           addRepaintBoundaries: widget.addRepaintBoundaries,
           addSemanticIndexes: widget.addSemanticIndexes,
         ),
@@ -328,7 +326,7 @@ final class _FluentListView<T> extends FluentListView<T> {
     super.padding,
     super.itemExtent,
     super.prototypeItem,
-    super.addAutomaticKeepAlive,
+    super.addAutomaticKeepAlives,
     super.addRepaintBoundaries,
     super.addSemanticIndexes,
     super.cacheExtent,
@@ -368,7 +366,7 @@ final class _PagedFluentListView<T> extends FluentListView<T> {
     super.padding,
     super.itemExtent,
     super.prototypeItem,
-    super.addAutomaticKeepAlive,
+    super.addAutomaticKeepAlives,
     super.addRepaintBoundaries,
     super.addSemanticIndexes,
     super.cacheExtent,
