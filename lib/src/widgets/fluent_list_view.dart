@@ -59,10 +59,11 @@ sealed class FluentListView<T> extends StatefulWidget {
   const factory FluentListView.paged({
     required Stream<Iterable<T>> stream,
     required IndexedListItemBuilder<T> itemBuilder,
-    required Future<bool> Function(int pageNumber, int pageSize) loadNextPage,
+    ListPagingController? pagingController,
+    LoadNextPage? loadNextPage,
+    int pageSize,
     Positioned loadingIndicator,
     double loadingScrollOffset,
-    int pageSize,
     WidgetBuilder waiting,
     ErrorBuilderFn error,
     WidgetValueBuilder<IList<T>> closed,
@@ -232,7 +233,6 @@ class _FluentListViewState<T, S extends FluentListView<T>> extends State<S> {
   void initState() {
     super.initState();
     controller = widget.controller;
-    controller = widget.controller;
     const config = ConfigList(isDeepEquals: true, cacheHashCode: true);
     stream = widget._stream.map((event) => event.toIList(config)).shareValue();
   }
@@ -344,10 +344,11 @@ final class _PagedFluentListView<T> extends FluentListView<T> {
   const _PagedFluentListView({
     required super.stream,
     required super.itemBuilder,
-    required this.loadNextPage,
+    this.pagingController,
+    this.loadNextPage,
+    this.pageSize = 20,
     this.loadingIndicator = _defaultLoadingIndicator,
     this.loadingScrollOffset = 0,
-    this.pageSize = 20,
     super.waiting,
     super.error,
     super.closed,
@@ -377,12 +378,15 @@ final class _PagedFluentListView<T> extends FluentListView<T> {
     super.itemComparator,
     super.ignoreOrder,
     super.key,
-  }) : super._();
+  })  : assert(pagingController != null || loadNextPage != null,
+            'You must pass `pagingController` or `loadNextPage`.'),
+        super._();
 
-  final Future<bool> Function(int pageNumber, int pageSize) loadNextPage;
+  final ListPagingController? pagingController;
+  final LoadNextPage? loadNextPage;
+  final int pageSize;
   final Positioned loadingIndicator;
   final double loadingScrollOffset;
-  final int pageSize;
 
   @override
   State<_PagedFluentListView<T>> createState() =>
@@ -401,31 +405,23 @@ final class _PagedFluentListView<T> extends FluentListView<T> {
 
 final class _PagedFluentListViewState<T>
     extends _FluentListViewState<T, _PagedFluentListView<T>> {
-  final ValueNotifier<bool> loadingNotifier = ValueNotifier<bool>(false);
-  late final ScrollController _controller;
-  int pageNumber = 1;
+  late final ScrollController _scrollController;
+  late final _LoadingNotifier _loadingNotifier;
 
   @override
   void initState() {
     super.initState();
-    _controller = controller ??= ScrollController();
-    _controller.addListener(_onScroll);
-    _load();
+    _scrollController = controller ??= ScrollController();
+    _scrollController.addListener(_onScroll);
+    _loadingNotifier = widget.pagingController?._loadingNotifier ??
+        _LoadingNotifier(widget.loadNextPage!, widget.pageSize);
+    _loadingNotifier.load();
   }
 
   void _onScroll() {
-    if (_controller.position.hasReachedPosition(widget.loadingScrollOffset) &&
-        !loadingNotifier.value) {
-      loadingNotifier.value = true;
-      _load();
+    if (_scrollController.hasReachedPosition(widget.loadingScrollOffset)) {
+      _loadingNotifier.loadNextPage();
     }
-  }
-
-  Future<void> _load() async {
-    if (await widget.loadNextPage(pageNumber, widget.pageSize)) {
-      pageNumber++;
-    }
-    loadingNotifier.value = false;
   }
 
   @override
@@ -434,7 +430,7 @@ final class _PagedFluentListViewState<T>
       children: [
         super.build(context),
         ValueListenableBuilder<bool>(
-          valueListenable: loadingNotifier,
+          valueListenable: _loadingNotifier,
           child: widget.loadingIndicator,
           builder: (_, value, child) =>
               value ? child! : const SizedBox.shrink(),
@@ -445,17 +441,57 @@ final class _PagedFluentListViewState<T>
 
   @override
   void dispose() {
-    _controller.removeListener(_onScroll);
+    _scrollController.removeListener(_onScroll);
     if (widget.controller == null) {
-      _controller.dispose();
+      _scrollController.dispose();
     }
-    loadingNotifier.dispose();
+    _loadingNotifier.dispose();
     super.dispose();
   }
 }
 
-extension on ScrollPosition {
-  bool hasReachedPosition(double offset) => pixels >= maxScrollExtent - offset;
+final class ListPagingController {
+  ListPagingController(
+      {required LoadNextPage loadNextPage, required int pageSize})
+      : _loadingNotifier = _LoadingNotifier(loadNextPage, pageSize);
+
+  final _LoadingNotifier _loadingNotifier;
+
+  Future<void> refresh() => _loadingNotifier.reset();
+
+  void dispose() => _loadingNotifier.dispose();
+}
+
+class _LoadingNotifier extends ValueNotifier<bool> {
+  _LoadingNotifier(this._loadNextPage, this.pageSize) : super(false);
+
+  final LoadNextPage _loadNextPage;
+  final int pageSize;
+  int pageNumber = 1;
+
+  Future<void> loadNextPage() async {
+    if (!value) {
+      value = true;
+      await load();
+    }
+  }
+
+  Future<void> load() async {
+    if (await _loadNextPage(pageNumber, pageSize)) {
+      pageNumber++;
+    }
+    value = false;
+  }
+
+  Future<void> reset() async {
+    pageNumber = 1;
+    await load();
+  }
+}
+
+extension on ScrollController {
+  bool hasReachedPosition(double offset) =>
+      position.pixels >= position.maxScrollExtent - offset;
 }
 
 class _ListViewBase extends BoxScrollView {

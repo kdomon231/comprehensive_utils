@@ -1,6 +1,10 @@
+## 0.6.16
+
+* Added `ListPagingController` to `FluentListView<T>.paged`
+
 ## 0.6.15
 
-* Added missing 'loadingScrollOffset' to `FluentListView<T>.paged`
+* Added missing `loadingScrollOffset` to `FluentListView<T>.paged`
 
 ## 0.6.14
 

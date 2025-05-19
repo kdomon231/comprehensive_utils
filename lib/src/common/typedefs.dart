@@ -16,3 +16,5 @@ typedef ErrorReporterFn = void Function(FlutterErrorDetails details);
 
 typedef IndexedListItemBuilder<T> = Widget Function(
     BuildContext context, int index, T? value);
+
+typedef LoadNextPage = Future<bool> Function(int pageNumber, int pageSize);
