@@ -1,3 +1,7 @@
+## 0.6.15
+
+* Added missing 'loadingScrollOffset' to `FluentListView<T>.paged`
+
 ## 0.6.14
 
 * Added `FluentListView<T>.paged`
