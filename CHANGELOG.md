@@ -1,3 +1,7 @@
+## 0.6.17
+
+* Fixed `dispose` in `FluentListView<T>.paged`
+
 ## 0.6.16
 
 * Added `ListPagingController` to `FluentListView<T>.paged`

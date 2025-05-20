@@ -445,7 +445,9 @@ final class _PagedFluentListViewState<T>
     if (widget.controller == null) {
       _scrollController.dispose();
     }
-    _loadingNotifier.dispose();
+    if (widget.pagingController == null) {
+      _loadingNotifier.dispose();
+    }
     super.dispose();
   }
 }
