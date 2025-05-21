@@ -20,5 +20,5 @@ export 'src/tools/indexing_collection.dart';
 export 'src/tools/lazy.dart';
 export 'src/tools/observable_timer.dart';
 export 'src/widgets/async_builder.dart';
-export 'src/widgets/fluent_list_view.dart';
+export 'src/widgets/fluent_list_view.dart' hide ListPagingNotifier;
 export 'src/widgets/init_builder.dart';
