@@ -1,3 +1,8 @@
+## 0.7.0
+
+* Reworked `InitBuilder<T>` for simplified passing of multiple arguments through the `args` constructor.
+* Improvements in `Lazy<T>`.
+
 ## 0.6.18
 
 * Reworked and improved `ListPagingController` in `FluentListView<T>.paged`

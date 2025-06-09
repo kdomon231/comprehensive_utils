@@ -5,7 +5,7 @@ typedef WidgetValueBuilder<T> = Widget Function(
     BuildContext context, T? value, Widget? child);
 
 /// Signature for a function that builds a widget from a value.
-typedef ValueBuilderFn<T> = Widget Function(BuildContext context, T? value);
+typedef ValueBuilderFn<T> = Widget Function(BuildContext context, T value);
 
 /// Signature for a function that builds a widget from an exception.
 typedef ErrorBuilderFn = Widget Function(

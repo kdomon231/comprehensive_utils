@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 /// this case InitBuilder only re-initializes the value if the `getter` function
 /// changes, you should not pass it an anonymous function directly.
 ///
-/// Alternative constructors [InitBuilder.arg] to [InitBuilder.arg7] can be used
+/// Alternative constructors [InitBuilder.arg] and [InitBuilder.args] can be used
 /// to pass arguments to the `getter`, these will re-initialize the value if
 /// either `getter` or the arguments change.
 ///
@@ -45,17 +45,17 @@ import 'package:flutter/widgets.dart';
 ///   ),
 /// );
 /// ```
-abstract class InitBuilder<T> extends StatefulWidget {
+sealed class InitBuilder<T> extends StatefulWidget {
   /// Factory constructor for a basic [InitBuilder].
   const factory InitBuilder({
-    required ValueBuilderFn<T> builder,
     required ValueGetter<T> getter,
+    required ValueBuilderFn<T> builder,
     ValueSetter<T>? disposer,
     Key? key,
   }) = _GetterInitBuilder<T>;
 
-  /// Base constructor for anything that implements [InitBuilder].
-  const InitBuilder.base({
+  /// Base constructor for internal [InitBuilder] implementations.
+  const InitBuilder._({
     required this.builder,
     this.disposer,
     super.key,
@@ -70,156 +70,34 @@ abstract class InitBuilder<T> extends StatefulWidget {
 
   /// Constructor for one argument getters.
   static InitBuilder<T> arg<T, A>({
-    required ValueBuilderFn<T> builder,
-    required A arg,
     required T Function(A) getter,
+    required A arg,
+    required ValueBuilderFn<T> builder,
     ValueSetter<T>? disposer,
     Key? key,
   }) =>
       _ArgInitBuilder<T, A>(
-        key: key,
-        builder: builder,
+        getter: getter,
         arg: arg,
-        getter: getter,
+        builder: builder,
         disposer: disposer,
+        key: key,
       );
 
-  /// Constructor for two argument getters.
-  static InitBuilder<T> arg2<T, A1, A2>({
+  /// Constructor for record type argument getters.
+  static InitBuilder<T> args<T, A extends Record>({
+    required T Function(A) getter,
+    required A args,
     required ValueBuilderFn<T> builder,
-    required A1 arg1,
-    required A2 arg2,
-    required T Function(A1, A2) getter,
     ValueSetter<T>? disposer,
     Key? key,
   }) =>
-      _Arg2InitBuilder<T, A1, A2>(
-        key: key,
-        builder: builder,
-        arg1: arg1,
-        arg2: arg2,
+      _ArgsInitBuilder<T, A>(
         getter: getter,
-        disposer: disposer,
-      );
-
-  /// Constructor for three argument getters.
-  static InitBuilder<T> arg3<T, A1, A2, A3>({
-    required ValueBuilderFn<T> builder,
-    required A1 arg1,
-    required A2 arg2,
-    required A3 arg3,
-    required T Function(A1, A2, A3) getter,
-    ValueSetter<T>? disposer,
-    Key? key,
-  }) =>
-      _Arg3InitBuilder<T, A1, A2, A3>(
-        key: key,
+        args: args,
         builder: builder,
-        arg1: arg1,
-        arg2: arg2,
-        arg3: arg3,
-        getter: getter,
         disposer: disposer,
-      );
-
-  /// Constructor for four argument getters.
-  static InitBuilder<T> arg4<T, A1, A2, A3, A4>({
-    required ValueBuilderFn<T> builder,
-    required A1 arg1,
-    required A2 arg2,
-    required A3 arg3,
-    required A4 arg4,
-    required T Function(A1, A2, A3, A4) getter,
-    ValueSetter<T>? disposer,
-    Key? key,
-  }) =>
-      _Arg4InitBuilder<T, A1, A2, A3, A4>(
         key: key,
-        builder: builder,
-        arg1: arg1,
-        arg2: arg2,
-        arg3: arg3,
-        arg4: arg4,
-        getter: getter,
-        disposer: disposer,
-      );
-
-  /// Constructor for five argument getters.
-  static InitBuilder<T> arg5<T, A1, A2, A3, A4, A5>({
-    required ValueBuilderFn<T> builder,
-    required A1 arg1,
-    required A2 arg2,
-    required A3 arg3,
-    required A4 arg4,
-    required A5 arg5,
-    required T Function(A1, A2, A3, A4, A5) getter,
-    ValueSetter<T>? disposer,
-    Key? key,
-  }) =>
-      _Arg5InitBuilder<T, A1, A2, A3, A4, A5>(
-        key: key,
-        builder: builder,
-        arg1: arg1,
-        arg2: arg2,
-        arg3: arg3,
-        arg4: arg4,
-        arg5: arg5,
-        getter: getter,
-        disposer: disposer,
-      );
-
-  /// Constructor for six argument getters.
-  static InitBuilder<T> arg6<T, A1, A2, A3, A4, A5, A6>({
-    required ValueBuilderFn<T> builder,
-    required A1 arg1,
-    required A2 arg2,
-    required A3 arg3,
-    required A4 arg4,
-    required A5 arg5,
-    required A6 arg6,
-    required T Function(A1, A2, A3, A4, A5, A6) getter,
-    ValueSetter<T>? disposer,
-    Key? key,
-  }) =>
-      _Arg6InitBuilder<T, A1, A2, A3, A4, A5, A6>(
-        key: key,
-        builder: builder,
-        arg1: arg1,
-        arg2: arg2,
-        arg3: arg3,
-        arg4: arg4,
-        arg5: arg5,
-        arg6: arg6,
-        getter: getter,
-        disposer: disposer,
-      );
-
-  /// Constructor for seven argument getters.
-  static InitBuilder<T> arg7<T, A1, A2, A3, A4, A5, A6, A7>({
-    required ValueBuilderFn<T> builder,
-    required A1 arg1,
-    required A2 arg2,
-    required A3 arg3,
-    required A4 arg4,
-    required A5 arg5,
-    required A6 arg6,
-    required A7 arg7,
-    required T Function(A1, A2, A3, A4, A5, A6, A7) getter,
-    ValueSetter<T>? disposer,
-    Key? key,
-  }) =>
-      _Arg7InitBuilder<T, A1, A2, A3, A4, A5, A6, A7>(
-        key: key,
-        builder: builder,
-        arg1: arg1,
-        arg2: arg2,
-        arg3: arg3,
-        arg4: arg4,
-        arg5: arg5,
-        arg6: arg6,
-        arg7: arg7,
-        getter: getter,
-        disposer: disposer,
       );
 
   /// Called by the widget state to initialize the value.
@@ -232,232 +110,10 @@ abstract class InitBuilder<T> extends StatefulWidget {
   State<InitBuilder<T>> createState() => _InitBuilderState<T>();
 }
 
-class _GetterInitBuilder<T> extends InitBuilder<T> {
-  const _GetterInitBuilder({
-    required super.builder,
-    required this.getter,
-    super.disposer,
-    super.key,
-  }) : super.base();
-
-  final ValueGetter<T> getter;
-
-  @override
-  T initValue() => getter();
-
-  @override
-  bool shouldInit(_GetterInitBuilder<T> other) => getter != other.getter;
-}
-
-class _ArgInitBuilder<T, A> extends InitBuilder<T> {
-  const _ArgInitBuilder({
-    required super.builder,
-    required this.arg,
-    required this.getter,
-    super.disposer,
-    super.key,
-  }) : super.base();
-
-  final A arg;
-  final T Function(A) getter;
-
-  @override
-  T initValue() => getter(arg);
-
-  @override
-  bool shouldInit(_ArgInitBuilder<T, A> other) =>
-      arg != other.arg || getter != other.getter;
-}
-
-class _Arg2InitBuilder<T, A1, A2> extends InitBuilder<T> {
-  const _Arg2InitBuilder({
-    required super.builder,
-    required this.arg1,
-    required this.arg2,
-    required this.getter,
-    super.disposer,
-    super.key,
-  }) : super.base();
-
-  final A1 arg1;
-  final A2 arg2;
-  final T Function(A1, A2) getter;
-
-  @override
-  T initValue() => getter(arg1, arg2);
-
-  @override
-  bool shouldInit(_Arg2InitBuilder<T, A1, A2> other) =>
-      arg1 != other.arg1 || arg2 != other.arg2 || getter != other.getter;
-}
-
-class _Arg3InitBuilder<T, A1, A2, A3> extends InitBuilder<T> {
-  const _Arg3InitBuilder({
-    required super.builder,
-    required this.arg1,
-    required this.arg2,
-    required this.arg3,
-    required this.getter,
-    super.disposer,
-    super.key,
-  }) : super.base();
-
-  final A1 arg1;
-  final A2 arg2;
-  final A3 arg3;
-  final T Function(A1, A2, A3) getter;
-
-  @override
-  T initValue() => getter(arg1, arg2, arg3);
-
-  @override
-  bool shouldInit(_Arg3InitBuilder<T, A1, A2, A3> other) =>
-      arg1 != other.arg1 ||
-      arg2 != other.arg2 ||
-      arg3 != other.arg3 ||
-      getter != other.getter;
-}
-
-class _Arg4InitBuilder<T, A1, A2, A3, A4> extends InitBuilder<T> {
-  const _Arg4InitBuilder({
-    required super.builder,
-    required this.arg1,
-    required this.arg2,
-    required this.arg3,
-    required this.arg4,
-    required this.getter,
-    super.disposer,
-    super.key,
-  }) : super.base();
-
-  final A1 arg1;
-  final A2 arg2;
-  final A3 arg3;
-  final A4 arg4;
-  final T Function(A1, A2, A3, A4) getter;
-
-  @override
-  T initValue() => getter(arg1, arg2, arg3, arg4);
-
-  @override
-  bool shouldInit(_Arg4InitBuilder<T, A1, A2, A3, A4> other) =>
-      arg1 != other.arg1 ||
-      arg2 != other.arg2 ||
-      arg3 != other.arg3 ||
-      arg4 != other.arg4 ||
-      getter != other.getter;
-}
-
-class _Arg5InitBuilder<T, A1, A2, A3, A4, A5> extends InitBuilder<T> {
-  const _Arg5InitBuilder({
-    required super.builder,
-    required this.arg1,
-    required this.arg2,
-    required this.arg3,
-    required this.arg4,
-    required this.arg5,
-    required this.getter,
-    super.disposer,
-    super.key,
-  }) : super.base();
-
-  final A1 arg1;
-  final A2 arg2;
-  final A3 arg3;
-  final A4 arg4;
-  final A5 arg5;
-  final T Function(A1, A2, A3, A4, A5) getter;
-
-  @override
-  T initValue() => getter(arg1, arg2, arg3, arg4, arg5);
-
-  @override
-  bool shouldInit(_Arg5InitBuilder<T, A1, A2, A3, A4, A5> other) =>
-      arg1 != other.arg1 ||
-      arg2 != other.arg2 ||
-      arg3 != other.arg3 ||
-      arg4 != other.arg4 ||
-      arg5 != other.arg5 ||
-      getter != other.getter;
-}
-
-class _Arg6InitBuilder<T, A1, A2, A3, A4, A5, A6> extends InitBuilder<T> {
-  const _Arg6InitBuilder({
-    required super.builder,
-    required this.arg1,
-    required this.arg2,
-    required this.arg3,
-    required this.arg4,
-    required this.arg5,
-    required this.arg6,
-    required this.getter,
-    super.disposer,
-    super.key,
-  }) : super.base();
-
-  final A1 arg1;
-  final A2 arg2;
-  final A3 arg3;
-  final A4 arg4;
-  final A5 arg5;
-  final A6 arg6;
-  final T Function(A1, A2, A3, A4, A5, A6) getter;
-
-  @override
-  T initValue() => getter(arg1, arg2, arg3, arg4, arg5, arg6);
-
-  @override
-  bool shouldInit(_Arg6InitBuilder<T, A1, A2, A3, A4, A5, A6> other) =>
-      arg1 != other.arg1 ||
-      arg2 != other.arg2 ||
-      arg3 != other.arg3 ||
-      arg4 != other.arg4 ||
-      arg5 != other.arg5 ||
-      arg6 != other.arg6 ||
-      getter != other.getter;
-}
-
-class _Arg7InitBuilder<T, A1, A2, A3, A4, A5, A6, A7> extends InitBuilder<T> {
-  const _Arg7InitBuilder({
-    required super.builder,
-    required this.arg1,
-    required this.arg2,
-    required this.arg3,
-    required this.arg4,
-    required this.arg5,
-    required this.arg6,
-    required this.arg7,
-    required this.getter,
-    super.disposer,
-    super.key,
-  }) : super.base();
-
-  final A1 arg1;
-  final A2 arg2;
-  final A3 arg3;
-  final A4 arg4;
-  final A5 arg5;
-  final A6 arg6;
-  final A7 arg7;
-  final T Function(A1, A2, A3, A4, A5, A6, A7) getter;
-
-  @override
-  T initValue() => getter(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
-
-  @override
-  bool shouldInit(_Arg7InitBuilder<T, A1, A2, A3, A4, A5, A6, A7> other) =>
-      arg1 != other.arg1 ||
-      arg2 != other.arg2 ||
-      arg3 != other.arg3 ||
-      arg4 != other.arg4 ||
-      arg5 != other.arg5 ||
-      arg6 != other.arg6 ||
-      arg7 != other.arg7 ||
-      getter != other.getter;
-}
-
+/// State class for InitBuilder that manages the lifecycle of the initialized value.
 class _InitBuilderState<T> extends State<InitBuilder<T>> {
-  T? value;
+  /// The current value initialized by the widget.
+  late T value;
 
   @override
   void initState() {
@@ -478,7 +134,69 @@ class _InitBuilderState<T> extends State<InitBuilder<T>> {
 
   @override
   void dispose() {
-    widget.disposer?.call(value as T);
+    if (widget.disposer case final disposer?) {
+      disposer.call(value);
+    } else if (value case final DisposableInitData disposableInitData) {
+      disposableInitData.dispose();
+    }
     super.dispose();
   }
+}
+
+/// Implementation of InitBuilder that uses a simple getter function.
+final class _GetterInitBuilder<T> extends InitBuilder<T> {
+  /// The getter function that provides the initial value.
+  const _GetterInitBuilder({
+    required this.getter,
+    required super.builder,
+    super.disposer,
+    super.key,
+  }) : super._();
+
+  final ValueGetter<T> getter;
+
+  @override
+  T initValue() => getter();
+
+  @override
+  bool shouldInit(_GetterInitBuilder<T> other) => getter != other.getter;
+}
+
+/// Implementation of InitBuilder that uses a getter function with a single argument.
+final class _ArgInitBuilder<T, A> extends InitBuilder<T> {
+  /// The getter function that takes an argument of type A and returns a value of type T.
+  const _ArgInitBuilder({
+    required this.getter,
+    required this.arg,
+    required super.builder,
+    super.disposer,
+    super.key,
+  }) : super._();
+
+  final T Function(A) getter;
+  final A arg;
+
+  @override
+  T initValue() => getter(arg);
+
+  @override
+  bool shouldInit(_ArgInitBuilder<T, A> other) =>
+      arg != other.arg || getter != other.getter;
+}
+
+/// Implementation of InitBuilder that uses a getter function with multiple arguments (record).
+final class _ArgsInitBuilder<T, A extends Record>
+    extends _ArgInitBuilder<T, A> {
+  /// Creates an InitBuilder with multiple arguments using a record.
+  const _ArgsInitBuilder({
+    required super.getter,
+    required A args,
+    required super.builder,
+    super.disposer,
+    super.key,
+  }) : super(arg: args);
+}
+
+abstract interface class DisposableInitData {
+  void dispose();
 }
