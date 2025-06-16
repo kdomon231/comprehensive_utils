@@ -40,10 +40,11 @@ class IndexingCollection<T> {
   ///
   /// Returns the value of the removed item, or `null` if no item with the given key exists.
   T? remove(int key) {
-    final value = _hashMap.remove(key);
-    if (value != null) {
-      _releasedIds.add(key);
+    if (!_hashMap.containsKey(key)) {
+      return null;
     }
+    final value = _hashMap.remove(key);
+    _releasedIds.add(key);
     return value;
   }
 

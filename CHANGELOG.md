@@ -1,3 +1,7 @@
+## 0.7.1
+
+* Fixed indexing in `IndexingCollection<T>` when type is nullable
+
 ## 0.7.0
 
 * Reworked `InitBuilder<T>` for simplified passing of multiple arguments through the `args` constructor.
@@ -29,7 +33,7 @@
 
 ## 0.6.12
 
-* Added `AsyncBuilder` and `InitBuilder`, modified versions based on https://pub.dev/packages/async_builder.
+* Added `AsyncBuilder<T>` and `InitBuilder<T>`, modified versions based on https://pub.dev/packages/async_builder.
 
 ## 0.6.11
 
