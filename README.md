@@ -15,40 +15,56 @@ and the Flutter guide for
 
 Widgets
 
-* FluentListView
+* FluentListView\<T>
+* AsyncBuilder\<T>
+* InitBuilder\<T>
 
 Tools
 
 * IndexingCollection\<T>
 * ObservableTimer
 * CacheManager
+* Lazy\<T>
 
 Streams
 
-* DistinctSubject
-* DistinctValueStream
-* DistinctConnectableStream
+* DistinctSubject\<T>
+* DistinctValueStream\<T>
+* DistinctConnectableStream\<T>
+* DistinctStreamCompleter\<T>
+* ValueStreamCompleter\<T>
 
-[//]: # (* GetStream)
+Implementation of numeric types
 
-[//]: # (* MiniStream)
+* Float
+* Byte
+* SByte
+* Short
+* UShort
+* UInt
+* ULong
 
 Extensions
 
 * on Stream:
-  * publishDistinctValue
-  * publishDistinctValueSeeded
-  * shareDistinctValue
-  * shareDistinctValueSeeded
-  * mapDistinctValue\<T>
-  * takeUntilFuture
+    * publishDistinctValue
+    * publishDistinctValueSeeded
+    * shareDistinctValue
+    * shareDistinctValueSeeded
+    * mapDistinctValue\<R>
+    * takeUntilFuture
+    * firstWhereType\<R>
+
+* on Future<bool?>
+    * onSuccess
+    * onFailure
 
 * on Iterable:
-  * parseList\<T>
-  * parseIterable\<T>
+    * parseList\<T>
+    * parseIterable\<T>
 
 * on Function:
-  * apply
+    * apply
 
 ## Getting started
 
@@ -61,6 +77,7 @@ import 'package:comprehensive_utils/comprehensive_utils.dart';
 ## Usage
 
 ```dart
+
 final DistinctSubject<String> _userNameSubject = DistinctSubject<String>();
 
 DistinctValueStream<String> get userNameStream => _userNameSubject.stream;

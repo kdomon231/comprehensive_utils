@@ -1,3 +1,8 @@
+## 0.7.3
+
+* Added `ValueStreamCompleter<T>` and `DistinctStreamCompleter<T>`
+* Updated README
+
 ## 0.7.2
 
 * Added `firstWhereType<R>` extension on `Stream<T>`
