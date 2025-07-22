@@ -1,3 +1,7 @@
+## 0.7.2
+
+* Added `firstWhereType<R>` extension on `Stream<T>`
+
 ## 0.7.1
 
 * Fixed indexing in `IndexingCollection<T>` when type is nullable

@@ -145,4 +145,48 @@ extension StreamAsyncExtensions<T> on Stream<T> {
     };
     return controller.stream;
   }
+
+  /// Returns the first element of type `R` in the stream.
+  ///
+  /// Listens to the stream and completes with the first element that is an instance of `R`.
+  /// If no such element is found and the stream ends:
+  /// - Returns `orElse()` if provided,
+  /// - Otherwise throws a `StateError`.
+  ///
+  /// Stops listening after the first match or on error.
+  ///
+  /// Example:
+  /// ```dart
+  /// final result = await stream.firstWhereType<String>();
+  /// ```
+  ///
+  /// Throws:
+  /// - `StateError` if no match and `orElse` is null.
+  /// - Any error thrown by `orElse()`.
+  Future<R> firstWhereType<R>({R Function()? orElse}) {
+    final completer = Completer<R>();
+    final subscription = listen(
+      null,
+      onDone: () {
+        if (orElse == null) {
+          completer.completeError(StateError('No element'), StackTrace.current);
+        } else {
+          try {
+            final replacement = orElse();
+            completer.complete(replacement);
+          } catch (e, s) {
+            completer.completeError(e, s);
+          }
+        }
+      },
+      onError: completer.completeError,
+      cancelOnError: true,
+    );
+    subscription.onData((data) {
+      if (data is R) {
+        subscription.cancel().whenComplete(() => completer.complete(data));
+      }
+    });
+    return completer.future;
+  }
 }
