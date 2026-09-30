@@ -55,11 +55,7 @@ sealed class InitBuilder<T> extends StatefulWidget {
   }) = _GetterInitBuilder<T>;
 
   /// Base constructor for internal [InitBuilder] implementations.
-  const InitBuilder._({
-    required this.builder,
-    this.disposer,
-    super.key,
-  });
+  const InitBuilder._({required this.builder, this.disposer, super.key});
 
   /// Builder that is called with a previously initialized value.
   final ValueBuilderFn<T> builder;
@@ -75,14 +71,13 @@ sealed class InitBuilder<T> extends StatefulWidget {
     required ValueBuilderFn<T> builder,
     ValueSetter<T>? disposer,
     Key? key,
-  }) =>
-      _ArgInitBuilder<T, A>(
-        getter: getter,
-        arg: arg,
-        builder: builder,
-        disposer: disposer,
-        key: key,
-      );
+  }) => _ArgInitBuilder<T, A>(
+    getter: getter,
+    arg: arg,
+    builder: builder,
+    disposer: disposer,
+    key: key,
+  );
 
   /// Constructor for record type argument getters.
   static InitBuilder<T> args<T, A extends Record>({
@@ -91,14 +86,13 @@ sealed class InitBuilder<T> extends StatefulWidget {
     required ValueBuilderFn<T> builder,
     ValueSetter<T>? disposer,
     Key? key,
-  }) =>
-      _ArgsInitBuilder<T, A>(
-        getter: getter,
-        args: args,
-        builder: builder,
-        disposer: disposer,
-        key: key,
-      );
+  }) => _ArgsInitBuilder<T, A>(
+    getter: getter,
+    args: args,
+    builder: builder,
+    disposer: disposer,
+    key: key,
+  );
 
   /// Called by the widget state to initialize the value.
   T initValue();

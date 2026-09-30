@@ -42,15 +42,17 @@ sealed class FluentListView<T> extends StatefulWidget {
     bool shrinkWrap,
     EdgeInsetsGeometry? padding,
     double? itemExtent,
+    ItemExtentBuilder? itemExtentBuilder,
     Widget? prototypeItem,
     bool addAutomaticKeepAlives,
     bool addRepaintBoundaries,
     bool addSemanticIndexes,
-    double? cacheExtent,
+    ScrollCacheExtent? scrollCacheExtent,
     DragStartBehavior dragStartBehavior,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior,
     String? restorationId,
     Clip clipBehavior,
+    HitTestBehavior hitTestBehavior,
     bool Function(T, T)? itemComparator,
     bool ignoreOrder,
     Key? key,
@@ -81,28 +83,30 @@ sealed class FluentListView<T> extends StatefulWidget {
     bool shrinkWrap,
     EdgeInsetsGeometry? padding,
     double? itemExtent,
+    ItemExtentBuilder? itemExtentBuilder,
     Widget? prototypeItem,
     bool addAutomaticKeepAlives,
     bool addRepaintBoundaries,
     bool addSemanticIndexes,
-    double? cacheExtent,
+    ScrollCacheExtent? scrollCacheExtent,
     DragStartBehavior dragStartBehavior,
     ScrollViewKeyboardDismissBehavior keyboardDismissBehavior,
     String? restorationId,
     Clip clipBehavior,
+    HitTestBehavior hitTestBehavior,
     bool Function(T, T)? itemComparator,
     bool ignoreOrder,
     Key? key,
   }) = _PagedFluentListView<T>;
 
   const FluentListView._({
-    required Stream<Iterable<T>> stream,
+    required this._stream,
     required this.itemBuilder,
     this.waiting = _nilWaiting,
     this.error = _nilError,
     this.closed = _nilClosed,
     this.initial = const IListConst([]),
-    this.retain = false,
+    this.retain = true,
     this.pause = false,
     this.silent,
     this.keepAlive = false,
@@ -115,24 +119,25 @@ sealed class FluentListView<T> extends StatefulWidget {
     this.shrinkWrap = false,
     this.padding,
     this.itemExtent,
+    this.itemExtentBuilder,
     this.prototypeItem,
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
     this.addSemanticIndexes = true,
-    this.cacheExtent,
+    this.scrollCacheExtent,
     this.dragStartBehavior = DragStartBehavior.start,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.hitTestBehavior = HitTestBehavior.opaque,
     this.itemComparator,
     bool ignoreOrder = false,
     super.key,
-  })  : _stream = stream,
-        _equality = ignoreOrder ? _equalsUnordered<T> : _equals<T>,
-        assert(
-          itemExtent == null || prototypeItem == null,
-          'You can only pass itemExtent or prototypeItem, not both.',
-        );
+  }) : _equality = ignoreOrder ? _equalsUnordered<T> : _equals<T>,
+       assert(
+         itemExtent == null || prototypeItem == null,
+         'You can only pass itemExtent or prototypeItem, not both.',
+       );
 
   final Stream<Iterable<T>> _stream;
   final IndexedListItemBuilder<T> itemBuilder;
@@ -153,18 +158,20 @@ sealed class FluentListView<T> extends StatefulWidget {
   final bool shrinkWrap;
   final EdgeInsetsGeometry? padding;
   final double? itemExtent;
+  final ItemExtentBuilder? itemExtentBuilder;
   final Widget? prototypeItem;
   final bool addAutomaticKeepAlives;
   final bool addRepaintBoundaries;
   final bool addSemanticIndexes;
-  final double? cacheExtent;
+  final ScrollCacheExtent? scrollCacheExtent;
   final DragStartBehavior dragStartBehavior;
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
   final String? restorationId;
   final Clip clipBehavior;
+  final HitTestBehavior hitTestBehavior;
   final bool Function(T, T)? itemComparator;
   final bool Function(IList<T>, IList<T>, {bool Function(T, T)? itemEquality})
-      _equality;
+  _equality;
 
   static bool _equals<T>(
     IList<T> list1,
@@ -214,10 +221,9 @@ sealed class FluentListView<T> extends StatefulWidget {
 
   static Widget _nilWaiting(BuildContext _) => const Nil();
 
-  static Widget _nilClosed(BuildContext _, Object? __, Widget? ___) =>
-      const Nil();
+  static Widget _nilClosed(BuildContext _, Object? _, Widget? _) => const Nil();
 
-  static Widget _nilError(BuildContext _, Object __, StackTrace? ___) =>
+  static Widget _nilError(BuildContext _, Object _, StackTrace? _) =>
       const Nil();
 
   @override
@@ -232,9 +238,9 @@ class _FluentListViewState<T, S extends FluentListView<T>> extends State<S> {
   @override
   void initState() {
     super.initState();
-    controller = widget.controller;
     const config = ConfigList(isDeepEquals: true, cacheHashCode: true);
     stream = widget._stream.map((event) => event.toIList(config)).shareValue();
+    controller = widget.controller;
   }
 
   @override
@@ -253,8 +259,11 @@ class _FluentListViewState<T, S extends FluentListView<T>> extends State<S> {
       reportError: widget.reportError,
       stream: stream.shareDistinctValue((list1, list2) {
         skipRestoration = widget.retain && list2.length < list1.length;
-        return widget._equality(list1, list2,
-            itemEquality: widget.itemComparator);
+        return widget._equality(
+          list1,
+          list2,
+          itemEquality: widget.itemComparator,
+        );
       }),
       builder: (context, value, _) => _ListViewBase(
         itemCount: value!.length,
@@ -266,12 +275,14 @@ class _FluentListViewState<T, S extends FluentListView<T>> extends State<S> {
         shrinkWrap: widget.shrinkWrap,
         padding: widget.padding,
         itemExtent: widget.itemExtent,
+        itemExtentBuilder: widget.itemExtentBuilder,
         prototypeItem: widget.prototypeItem,
-        cacheExtent: widget.cacheExtent,
+        scrollCacheExtent: widget.scrollCacheExtent,
         dragStartBehavior: widget.dragStartBehavior,
         keyboardDismissBehavior: widget.keyboardDismissBehavior,
         restorationId: widget.restorationId,
         clipBehavior: widget.clipBehavior,
+        hitTestBehavior: widget.hitTestBehavior,
         childrenDelegate: SliverChildBuilderDelegate(
           (context, index) => _DistinctBuilder<T>(
             key: ValueKey<T>(value[index]),
@@ -282,7 +293,7 @@ class _FluentListViewState<T, S extends FluentListView<T>> extends State<S> {
             pause: widget.pause,
             silent: true,
             keepAlive: widget.keepAlive,
-            stream: stream.map((event) => event[index]).shareDistinctValue(),
+            stream: stream.mapDistinctValue((event) => event[index]),
             builder: (context, item, _) =>
                 widget.itemBuilder(context, index, item),
           ),
@@ -290,8 +301,9 @@ class _FluentListViewState<T, S extends FluentListView<T>> extends State<S> {
             if (skipRestoration) {
               return null;
             }
-            final index =
-                value.indexWhere((item) => item == (key as ValueKey<T>).value);
+            final index = value.indexWhere(
+              (item) => item == (key as ValueKey<T>).value,
+            );
             return index == -1 ? null : index;
           },
           childCount: value.length,
@@ -325,15 +337,17 @@ final class _FluentListView<T> extends FluentListView<T> {
     super.shrinkWrap,
     super.padding,
     super.itemExtent,
+    super.itemExtentBuilder,
     super.prototypeItem,
     super.addAutomaticKeepAlives,
     super.addRepaintBoundaries,
     super.addSemanticIndexes,
-    super.cacheExtent,
+    super.scrollCacheExtent,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
     super.restorationId,
     super.clipBehavior,
+    super.hitTestBehavior,
     super.itemComparator,
     super.ignoreOrder,
     super.key,
@@ -366,15 +380,17 @@ final class _PagedFluentListView<T> extends FluentListView<T> {
     super.shrinkWrap,
     super.padding,
     super.itemExtent,
+    super.itemExtentBuilder,
     super.prototypeItem,
     super.addAutomaticKeepAlives,
     super.addRepaintBoundaries,
     super.addSemanticIndexes,
-    super.cacheExtent,
+    super.scrollCacheExtent,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
     super.restorationId,
     super.clipBehavior,
+    super.hitTestBehavior,
     super.itemComparator,
     super.ignoreOrder,
     super.key,
@@ -551,31 +567,39 @@ class _ListViewBase extends BoxScrollView {
     super.shrinkWrap,
     super.padding,
     this.itemExtent,
+    this.itemExtentBuilder,
     this.prototypeItem,
     int? itemCount,
-    super.cacheExtent,
+    super.scrollCacheExtent,
     int? semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
     super.restorationId,
     super.clipBehavior,
+    super.hitTestBehavior,
   }) : super(semanticChildCount: semanticChildCount ?? itemCount);
 
   final double? itemExtent;
+  final ItemExtentBuilder? itemExtentBuilder;
   final Widget? prototypeItem;
   final SliverChildDelegate childrenDelegate;
 
   @override
   Widget buildChildLayout(BuildContext context) {
-    if (itemExtent != null) {
+    if (itemExtent case final itemExtent?) {
       return SliverFixedExtentList(
         delegate: childrenDelegate,
-        itemExtent: itemExtent!,
+        itemExtent: itemExtent,
       );
-    } else if (prototypeItem != null) {
+    } else if (itemExtentBuilder case final itemExtentBuilder?) {
+      return SliverVariedExtentList(
+        delegate: childrenDelegate,
+        itemExtentBuilder: itemExtentBuilder,
+      );
+    } else if (prototypeItem case final prototypeItem?) {
       return SliverPrototypeExtentList(
         delegate: childrenDelegate,
-        prototypeItem: prototypeItem!,
+        prototypeItem: prototypeItem,
       );
     }
     return SliverList(delegate: childrenDelegate);
@@ -584,8 +608,9 @@ class _ListViewBase extends BoxScrollView {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties
-        .add(DoubleProperty('itemExtent', itemExtent, defaultValue: null));
+    properties.add(
+      DoubleProperty('itemExtent', itemExtent, defaultValue: null),
+    );
   }
 }
 
@@ -607,7 +632,7 @@ class _DistinctBuilder<T> extends AsyncBuilder<T> {
   });
 
   @override
-  State<StatefulWidget> createState() => _DistinctBuilderState<T>();
+  State<_DistinctBuilder<T>> createState() => _DistinctBuilderState<T>();
 }
 
 class _DistinctBuilderState<T> extends State<_DistinctBuilder<T>>
@@ -721,21 +746,25 @@ class _DistinctBuilderState<T> extends State<_DistinctBuilder<T>>
   Widget build(BuildContext context) {
     super.build(context);
 
-    if (_lastError != null && widget.error != null) {
-      return widget.error!(context, _lastError!, _lastStackTrace);
+    if (widget.error case final error? when _lastError != null) {
+      return error(context, _lastError!, _lastStackTrace);
     }
-
-    if (_isClosed && widget.closed != null) {
-      return widget.closed!(
-          context, _hasFired ? _lastValue : widget.initial, widget.child);
+    if (widget.closed case final closed? when _isClosed) {
+      return closed(
+        context,
+        _hasFired ? _lastValue : widget.initial,
+        widget.child,
+      );
     }
-
-    if (!_hasFired && widget.waiting != null) {
-      return widget.waiting!(context);
+    if (widget.waiting case final waiting? when !_hasFired) {
+      return waiting(context);
     }
 
     return widget.builder(
-        context, _hasFired ? _lastValue : widget.initial, widget.child);
+      context,
+      _hasFired ? _lastValue : widget.initial,
+      widget.child,
+    );
   }
 
   @override

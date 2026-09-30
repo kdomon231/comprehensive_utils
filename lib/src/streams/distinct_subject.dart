@@ -31,11 +31,8 @@ class DistinctSubject<T> extends Subject<T>
     );
   }
 
-  DistinctSubject._(
-    super.controller,
-    super.stream,
-    this._wrapper,
-  ) : _controller = controller;
+  DistinctSubject._(super.controller, super.stream, this._wrapper)
+    : _controller = controller;
 
   factory DistinctSubject.seeded(
     T seedValue, {
@@ -65,26 +62,26 @@ class DistinctSubject<T> extends Subject<T>
   static Stream<T> Function() _deferStream<T>(
     _Wrapper<T> wrapper,
     StreamController<T> controller,
-  ) =>
-      () {
-        final errorAndStackTrace = wrapper.errorAndStackTrace;
-        if (errorAndStackTrace != null && !wrapper.isValue) {
-          return controller.stream.transform(
-            StartWithErrorStreamTransformer<T>(
-              errorAndStackTrace.error,
-              errorAndStackTrace.stackTrace,
-            ),
-          );
-        }
+  ) => () {
+    final errorAndStackTrace = wrapper.errorAndStackTrace;
+    if (errorAndStackTrace != null && !wrapper.isValue) {
+      return controller.stream.transform(
+        StartWithErrorStreamTransformer<T>(
+          errorAndStackTrace.error,
+          errorAndStackTrace.stackTrace,
+        ),
+      );
+    }
 
-        final value = wrapper.value;
-        if (isNotEmpty(value) && wrapper.isValue) {
-          return controller.stream
-              .transform(StartWithStreamTransformer<T>(value as T));
-        }
+    final value = wrapper.value;
+    if (isNotEmpty(value) && wrapper.isValue) {
+      return controller.stream.transform(
+        StartWithStreamTransformer<T>(value as T),
+      );
+    }
 
-        return controller.stream;
-      };
+    return controller.stream;
+  };
 
   @override
   DistinctValueStream<T> get stream => _DistinctSubjectStream(this);
@@ -251,13 +248,12 @@ class _DistinctSubjectStream<T> extends Stream<T>
     Function? onError,
     void Function()? onDone,
     bool? cancelOnError,
-  }) =>
-      _subject.listen(
-        onData,
-        onError: onError,
-        onDone: onDone,
-        cancelOnError: cancelOnError,
-      );
+  }) => _subject.listen(
+    onData,
+    onError: onError,
+    onDone: onDone,
+    cancelOnError: cancelOnError,
+  );
 
   @override
   Object get error => _subject.error;

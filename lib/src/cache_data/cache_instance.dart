@@ -19,8 +19,11 @@ sealed class CacheInstance<T> {
 }
 
 final class CacheHolder<T> extends CacheInstance<T> {
-  factory CacheHolder(Map<String, CacheInstance<Object?>> caches, String key,
-      Duration timeToLive) {
+  factory CacheHolder(
+    Map<String, CacheInstance<Object?>> caches,
+    String key,
+    Duration timeToLive,
+  ) {
     final instance = CacheHolder._(ValueCache<T>(timeToLive));
     caches[key] = instance;
     return instance;

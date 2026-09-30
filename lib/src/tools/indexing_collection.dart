@@ -1,4 +1,5 @@
 import 'dart:collection';
+
 import 'package:collection/collection.dart';
 
 /// A class representing a collection of items with integer keys.

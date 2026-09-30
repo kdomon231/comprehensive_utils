@@ -19,7 +19,8 @@ extension JsonIterableParseExtension on Iterable<dynamic> {
   ///
   /// Returns an iterable of [T].
   Iterable<T> parseIterable<T>(
-      T Function(Map<String, Object?> json) fromJson) sync* {
+    T Function(Map<String, Object?> json) fromJson,
+  ) sync* {
     for (final element in this) {
       yield fromJson(element as Map<String, Object?>);
     }

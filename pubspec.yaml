@@ -4,19 +4,19 @@ version: 0.7.3
 repository: https://github.com/kdomon231/comprehensive_utils
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
-  flutter: ">=1.17.0"
+  sdk: ^3.13.4
+  flutter: ^3.47.5
 
 dependencies:
   flutter:
     sdk: flutter
 
-  async: ^2.11.0
+  async: ^2.13.1
   rxdart: ^0.28.0
-  fast_immutable_collections: ^11.0.0
+  fast_immutable_collections: ^11.2.0
   nil: ^1.1.1
-  collection: ^1.18.0
-  meta: ^1.15.0
+  collection: ^1.19.1
+  meta: ^1.19.0
 
 dev_dependencies:
   flutter_test:

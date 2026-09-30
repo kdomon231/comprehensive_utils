@@ -78,11 +78,15 @@ class AsyncBuilder<T> extends StatefulWidget {
     this.reportError = FlutterError.reportError,
     this.child,
     super.key,
-  })  : silent = silent ?? error != null,
-        assert(!((future != null) && (stream != null)),
-            'AsyncBuilder should be given either a stream or future'),
-        assert(future == null || closed == null,
-            'AsyncBuilder should not be given both a future and closed builder');
+  }) : silent = silent ?? error != null,
+       assert(
+         !((future != null) && (stream != null)),
+         'AsyncBuilder should be given either a stream or future',
+       ),
+       assert(
+         future == null || closed == null,
+         'AsyncBuilder should not be given both a future and closed builder',
+       );
 
   @override
   State<StatefulWidget> createState() => _AsyncBuilderState<T>();
@@ -173,18 +177,15 @@ class _AsyncBuilderState<T> extends State<AsyncBuilder<T>>
 
   void _initFuture(Future<T> future) {
     _cancel();
-    future.then(
-      (T value) {
-        if (future != widget.future || !mounted) {
-          return; // Skip if future changed
-        }
-        setState(() {
-          _lastValue = value;
-          _hasFired = true;
-        });
-      },
-      onError: _handleError,
-    );
+    future.then((T value) {
+      if (future != widget.future || !mounted) {
+        return; // Skip if future changed
+      }
+      setState(() {
+        _lastValue = value;
+        _hasFired = true;
+      });
+    }, onError: _handleError);
   }
 
   void _updatePause() {
@@ -269,7 +270,10 @@ class _AsyncBuilderState<T> extends State<AsyncBuilder<T>>
 
     if (_isClosed && widget.closed != null) {
       return widget.closed!(
-          context, _hasFired ? _lastValue : widget.initial, widget.child);
+        context,
+        _hasFired ? _lastValue : widget.initial,
+        widget.child,
+      );
     }
 
     if (!_hasFired && widget.waiting != null) {
@@ -277,7 +281,10 @@ class _AsyncBuilderState<T> extends State<AsyncBuilder<T>>
     }
 
     return widget.builder(
-        context, _hasFired ? _lastValue : widget.initial, widget.child);
+      context,
+      _hasFired ? _lastValue : widget.initial,
+      widget.child,
+    );
   }
 
   @override

@@ -35,6 +35,7 @@ final class _LazyAsync<T> extends Lazy<Future<T>> {
   _LazyAsync(super.factory);
 
   @override
-  Future<T> get value => _value ??=
-      _factory().then((value) => _value = SynchronousFuture<T>(value));
+  Future<T> get value => _value ??= _factory().then(
+    (value) => _value = SynchronousFuture<T>(value),
+  );
 }

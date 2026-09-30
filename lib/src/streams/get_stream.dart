@@ -112,16 +112,17 @@ class GetStream<T> {
     void Function()? onDone,
     bool cancelOnError = false,
   }) {
-    final subs = LightSubscription<T>(
-      removeSubscription,
-      onPause: onPause,
-      onResume: onResume,
-      onCancel: onCancel,
-    )
-      ..onData(onData)
-      ..onError(onError)
-      ..onDone(onDone)
-      ..cancelOnError = cancelOnError;
+    final subs =
+        LightSubscription<T>(
+            removeSubscription,
+            onPause: onPause,
+            onResume: onResume,
+            onCancel: onCancel,
+          )
+          ..onData(onData)
+          ..onError(onError)
+          ..onDone(onDone)
+          ..cancelOnError = cancelOnError;
     addSubscription(subs);
     onListen?.call();
     return subs;

@@ -34,7 +34,10 @@ base mixin class CacheManager {
   /// - timeToLive: The duration after which the cache will expire.
   /// - callback: The function for fetching data.
   CacheConsumer<T> getConsumer<T>(
-      String key, Duration timeToLive, Future<T> Function() callback) {
+    String key,
+    Duration timeToLive,
+    Future<T> Function() callback,
+  ) {
     final cache = _tryRetrieve<T, CacheConsumer<T>>(key);
     return cache ?? CacheConsumer<T>(_caches, key, timeToLive, callback);
   }

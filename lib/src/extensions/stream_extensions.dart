@@ -11,8 +11,7 @@ extension StreamDistinctExtensions<T> on Stream<T> {
   /// the `==` operator is used.
   DistinctValueConnectableStream<T> publishDistinctValue([
     bool Function(T, T)? equals,
-  ]) =>
-      DistinctValueConnectableStream<T>(this, sync: true, equals: equals);
+  ]) => DistinctValueConnectableStream<T>(this, sync: true, equals: equals);
 
   /// Creates a `DistinctValueConnectableStream` that emits distinct values from this stream,
   /// starting with the provided [seedValue].
@@ -22,13 +21,12 @@ extension StreamDistinctExtensions<T> on Stream<T> {
   DistinctValueConnectableStream<T> publishDistinctValueSeeded(
     T seedValue, [
     bool Function(T, T)? equals,
-  ]) =>
-      DistinctValueConnectableStream<T>.seeded(
-        this,
-        seedValue,
-        sync: true,
-        equals: equals,
-      );
+  ]) => DistinctValueConnectableStream<T>.seeded(
+    this,
+    seedValue,
+    sync: true,
+    equals: equals,
+  );
 
   /// Creates a `DistinctValueStream` that emits distinct values from this stream,
   /// and automatically manages the subscription and cancellation of the underlying stream.
@@ -49,8 +47,7 @@ extension StreamDistinctExtensions<T> on Stream<T> {
   DistinctValueStream<T> shareDistinctValueSeeded(
     T seedValue, [
     bool Function(T, T)? equals,
-  ]) =>
-      publishDistinctValueSeeded(seedValue, equals).refCount();
+  ]) => publishDistinctValueSeeded(seedValue, equals).refCount();
 
   /// Maps the values of this stream to a new stream of type [R], while ensuring that only distinct
   /// values are emitted.
@@ -64,8 +61,10 @@ extension StreamDistinctExtensions<T> on Stream<T> {
   ///
   /// Returns a `DistinctValueStream` that emits distinct values of type [R], and automatically
   /// manages the subscription and cancellation of the underlying stream.
-  DistinctValueStream<R> mapDistinctValue<R>(R Function(T event) convert,
-      [bool Function(R, R)? equals]) {
+  DistinctValueStream<R> mapDistinctValue<R>(
+    R Function(T event) convert, [
+    bool Function(R, R)? equals,
+  ]) {
     if (this case final ValueStream<T> stream when stream.hasValue) {
       return DistinctValueConnectableStream<R>.seeded(
         stream.map(convert),
@@ -74,9 +73,11 @@ extension StreamDistinctExtensions<T> on Stream<T> {
         equals: equals,
       ).refCount();
     }
-    return DistinctValueConnectableStream<R>(map(convert),
-            sync: true, equals: equals)
-        .refCount();
+    return DistinctValueConnectableStream<R>(
+      map(convert),
+      sync: true,
+      equals: equals,
+    ).refCount();
   }
 }
 
