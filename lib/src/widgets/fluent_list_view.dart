@@ -2,8 +2,11 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:collection/collection.dart';
-import 'package:comprehensive_utils/comprehensive_utils.dart';
 import 'package:comprehensive_utils/src/common/typedefs.dart';
+import 'package:comprehensive_utils/src/extensions/stream_extensions.dart';
+import 'package:comprehensive_utils/src/helpers/list_paging_controller.dart';
+import 'package:comprehensive_utils/src/helpers/list_paging_notifier.dart';
+import 'package:comprehensive_utils/src/widgets/async_builder.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -11,8 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:nil/nil.dart';
 import 'package:rxdart/rxdart.dart';
-
-// ignore_for_file: avoid_redundant_argument_values
 
 /// A FluentListView widget is a widget that displays a scrolling, linear list of elements.
 /// It listens to a stream of iterable of type T and builds the list based on the elements in the stream.
@@ -135,8 +136,10 @@ sealed class FluentListView<T> extends StatefulWidget {
     super.key,
   }) : _equality = ignoreOrder ? _equalsUnordered<T> : _equals<T>,
        assert(
-         itemExtent == null || prototypeItem == null,
-         'You can only pass itemExtent or prototypeItem, not both.',
+         (itemExtent == null && prototypeItem == null) ||
+             (itemExtent == null && itemExtentBuilder == null) ||
+             (prototypeItem == null && itemExtentBuilder == null),
+         'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
        );
 
   final Stream<Iterable<T>> _stream;
@@ -170,14 +173,9 @@ sealed class FluentListView<T> extends StatefulWidget {
   final Clip clipBehavior;
   final HitTestBehavior hitTestBehavior;
   final bool Function(T, T)? itemComparator;
-  final bool Function(IList<T>, IList<T>, {bool Function(T, T)? itemEquality})
-  _equality;
+  final bool Function(IList<T>, IList<T>, {bool Function(T, T)? itemEquality}) _equality;
 
-  static bool _equals<T>(
-    IList<T> list1,
-    IList<T> list2, {
-    bool Function(T, T)? itemEquality,
-  }) {
+  static bool _equals<T>(IList<T> list1, IList<T> list2, {bool Function(T, T)? itemEquality}) {
     final length = list1.length;
     if (length != list2.length) {
       return false;
@@ -191,11 +189,7 @@ sealed class FluentListView<T> extends StatefulWidget {
     return true;
   }
 
-  static bool _equalsUnordered<T>(
-    IList<T> elements1,
-    IList<T> elements2, {
-    bool Function(T, T)? itemEquality,
-  }) {
+  static bool _equalsUnordered<T>(IList<T> elements1, IList<T> elements2, {bool Function(T, T)? itemEquality}) {
     const defaultEquality = DefaultEquality<Never>();
     final counts = HashMap<T, int>(
       equals: itemEquality ?? defaultEquality.equals,
@@ -223,12 +217,10 @@ sealed class FluentListView<T> extends StatefulWidget {
 
   static Widget _nilClosed(BuildContext _, Object? _, Widget? _) => const Nil();
 
-  static Widget _nilError(BuildContext _, Object _, StackTrace? _) =>
-      const Nil();
+  static Widget _nilError(BuildContext _, Object _, StackTrace? _) => const Nil();
 
   @override
-  State<FluentListView<T>> createState() =>
-      _FluentListViewState<T, FluentListView<T>>();
+  State<FluentListView<T>> createState() => _FluentListViewState<T, FluentListView<T>>();
 }
 
 class _FluentListViewState<T, S extends FluentListView<T>> extends State<S> {
@@ -238,8 +230,8 @@ class _FluentListViewState<T, S extends FluentListView<T>> extends State<S> {
   @override
   void initState() {
     super.initState();
-    const config = ConfigList(isDeepEquals: true, cacheHashCode: true);
-    stream = widget._stream.map((event) => event.toIList(config)).shareValue();
+    const ConfigList config = ConfigList();
+    stream = widget._stream.mapShareValue((event) => event.toIList(config));
     controller = widget.controller;
   }
 
@@ -259,11 +251,7 @@ class _FluentListViewState<T, S extends FluentListView<T>> extends State<S> {
       reportError: widget.reportError,
       stream: stream.shareDistinctValue((list1, list2) {
         skipRestoration = widget.retain && list2.length < list1.length;
-        return widget._equality(
-          list1,
-          list2,
-          itemEquality: widget.itemComparator,
-        );
+        return widget._equality(list1, list2, itemEquality: widget.itemComparator);
       }),
       builder: (context, value, _) => _ListViewBase(
         itemCount: value!.length,
@@ -294,16 +282,14 @@ class _FluentListViewState<T, S extends FluentListView<T>> extends State<S> {
             silent: true,
             keepAlive: widget.keepAlive,
             stream: stream.mapDistinctValue((event) => event[index]),
-            builder: (context, item, _) =>
-                widget.itemBuilder(context, index, item),
+            builder: (context, item, _) => widget.itemBuilder(context, index, item),
           ),
           findChildIndexCallback: (key) {
             if (skipRestoration) {
               return null;
             }
-            final index = value.indexWhere(
-              (item) => item == (key as ValueKey<T>).value,
-            );
+            final keyValue = (key as ValueKey<T>).value;
+            final index = value.indexWhere((item) => item == keyValue);
             return index == -1 ? null : index;
           },
           childCount: value.length,
@@ -403,22 +389,17 @@ final class _PagedFluentListView<T> extends FluentListView<T> {
   final ListPagingController? pagingController;
 
   @override
-  State<_PagedFluentListView<T>> createState() =>
-      _PagedFluentListViewState<T>();
+  State<_PagedFluentListView<T>> createState() => _PagedFluentListViewState<T>();
 
   static const Positioned _defaultLoadingIndicator = Positioned(
     bottom: 16,
     left: 0,
     right: 0,
-    child: SizedBox(
-      height: 50,
-      child: Center(child: CircularProgressIndicator()),
-    ),
+    child: SizedBox(height: 50, child: Center(child: CircularProgressIndicator())),
   );
 }
 
-final class _PagedFluentListViewState<T>
-    extends _FluentListViewState<T, _PagedFluentListView<T>> {
+final class _PagedFluentListViewState<T> extends _FluentListViewState<T, _PagedFluentListView<T>> {
   late final ScrollController _scrollController;
   late final ListPagingNotifier _pagingNotifier;
 
@@ -427,8 +408,7 @@ final class _PagedFluentListViewState<T>
     super.initState();
     _scrollController = controller ??= ScrollController();
     _scrollController.addListener(_onScroll);
-    _pagingNotifier = _ListPagingNotifier(widget.loadNextPage, widget.pageSize);
-    widget.pagingController?.attach(_pagingNotifier);
+    _pagingNotifier = ListPagingNotifier(widget.loadNextPage, widget.pageSize, widget.pagingController);
   }
 
   void _onScroll() {
@@ -445,8 +425,7 @@ final class _PagedFluentListViewState<T>
         ValueListenableBuilder<bool>(
           valueListenable: _pagingNotifier,
           child: widget.loadingIndicator,
-          builder: (_, value, child) =>
-              value ? child! : const SizedBox.shrink(),
+          builder: (_, value, child) => value ? child! : const SizedBox.shrink(),
         ),
       ],
     );
@@ -458,102 +437,14 @@ final class _PagedFluentListViewState<T>
     if (widget.controller == null) {
       _scrollController.dispose();
     }
-    widget.pagingController?.detach();
     _pagingNotifier.dispose();
     super.dispose();
   }
 }
 
-sealed class ListPagingController {
-  factory ListPagingController() = _ListPagingController;
-
-  ListPagingController._();
-
-  int? get currentPage;
-
-  Future<void> reset();
-
-  @protected
-  void attach(ListPagingNotifier notifier);
-
-  @protected
-  void detach();
-}
-
-final class _ListPagingController extends ListPagingController {
-  _ListPagingController() : super._();
-
-  _ListPagingNotifier? _notifier;
-
-  @override
-  int? get currentPage => _notifier?.pageNumber;
-
-  @override
-  Future<void> reset() async => await _notifier?.refresh();
-
-  @override
-  @protected
-  void attach(covariant _ListPagingNotifier notifier) => _notifier = notifier;
-
-  @override
-  @protected
-  void detach() => _notifier = null;
-}
-
-sealed class ListPagingNotifier
-    with ChangeNotifier
-    implements ValueListenable<bool> {
-  ListPagingNotifier();
-
-  Future<void> loadNextPage();
-}
-
-final class _ListPagingNotifier extends ListPagingNotifier {
-  _ListPagingNotifier(this._loadNextPage, this.pageSize) {
-    load();
-  }
-
-  final LoadNextPage _loadNextPage;
-  final int pageSize;
-  int pageNumber = 1;
-  bool _isLoading = false;
-
-  @override
-  bool get value => _isLoading;
-
-  set value(bool newValue) {
-    if (_isLoading == newValue) {
-      return;
-    }
-    _isLoading = newValue;
-    notifyListeners();
-  }
-
-  @override
-  Future<void> loadNextPage() async {
-    if (!value) {
-      value = true;
-      await load();
-    }
-  }
-
-  Future<void> load() async {
-    if (await _loadNextPage(pageNumber, pageSize)) {
-      pageNumber++;
-    }
-    value = false;
-  }
-
-  Future<void> refresh() async {
-    pageNumber = 1;
-    await load();
-  }
-}
-
 extension on ScrollController {
   bool hasReachedPosition(double offset) =>
-      position.userScrollDirection == ScrollDirection.reverse &&
-      position.pixels >= position.maxScrollExtent - offset;
+      position.userScrollDirection == ScrollDirection.reverse && position.pixels >= position.maxScrollExtent - offset;
 }
 
 class _ListViewBase extends BoxScrollView {
@@ -587,20 +478,11 @@ class _ListViewBase extends BoxScrollView {
   @override
   Widget buildChildLayout(BuildContext context) {
     if (itemExtent case final itemExtent?) {
-      return SliverFixedExtentList(
-        delegate: childrenDelegate,
-        itemExtent: itemExtent,
-      );
+      return SliverFixedExtentList(delegate: childrenDelegate, itemExtent: itemExtent);
     } else if (itemExtentBuilder case final itemExtentBuilder?) {
-      return SliverVariedExtentList(
-        delegate: childrenDelegate,
-        itemExtentBuilder: itemExtentBuilder,
-      );
+      return SliverVariedExtentList(delegate: childrenDelegate, itemExtentBuilder: itemExtentBuilder);
     } else if (prototypeItem case final prototypeItem?) {
-      return SliverPrototypeExtentList(
-        delegate: childrenDelegate,
-        prototypeItem: prototypeItem,
-      );
+      return SliverPrototypeExtentList(delegate: childrenDelegate, prototypeItem: prototypeItem);
     }
     return SliverList(delegate: childrenDelegate);
   }
@@ -608,9 +490,7 @@ class _ListViewBase extends BoxScrollView {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-      DoubleProperty('itemExtent', itemExtent, defaultValue: null),
-    );
+    properties.add(DoubleProperty('itemExtent', itemExtent, defaultValue: null));
   }
 }
 
@@ -635,8 +515,7 @@ class _DistinctBuilder<T> extends AsyncBuilder<T> {
   State<_DistinctBuilder<T>> createState() => _DistinctBuilderState<T>();
 }
 
-class _DistinctBuilderState<T> extends State<_DistinctBuilder<T>>
-    with AutomaticKeepAliveClientMixin {
+class _DistinctBuilderState<T> extends State<_DistinctBuilder<T>> with AutomaticKeepAliveClientMixin {
   T? _lastValue;
   Object? _lastError;
   StackTrace? _lastStackTrace;
@@ -750,21 +629,13 @@ class _DistinctBuilderState<T> extends State<_DistinctBuilder<T>>
       return error(context, _lastError!, _lastStackTrace);
     }
     if (widget.closed case final closed? when _isClosed) {
-      return closed(
-        context,
-        _hasFired ? _lastValue : widget.initial,
-        widget.child,
-      );
+      return closed(context, _hasFired ? _lastValue : widget.initial, widget.child);
     }
     if (widget.waiting case final waiting? when !_hasFired) {
       return waiting(context);
     }
 
-    return widget.builder(
-      context,
-      _hasFired ? _lastValue : widget.initial,
-      widget.child,
-    );
+    return widget.builder(context, _hasFired ? _lastValue : widget.initial, widget.child);
   }
 
   @override

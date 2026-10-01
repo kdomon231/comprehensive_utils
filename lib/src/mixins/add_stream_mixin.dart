@@ -12,9 +12,7 @@ mixin AddStreamMixin<T> {
     bool? cancelOnError,
   }) {
     if (_isAddingStreamItems) {
-      throw StateError(
-        'You cannot add items while items are being added from addStream',
-      );
+      throw StateError('You cannot add items while items are being added from addStream');
     }
     _isAddingStreamItems = true;
 

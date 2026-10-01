@@ -5,6 +5,9 @@
 # IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
 # invoked from the command line by running `flutter analyze`.
 
+formatter:
+  page_width: 120
+
 analyzer:
   language:
     strict-casts: true
@@ -20,6 +23,14 @@ analyzer:
     todo: ignore
     # Reassignment should be treated as warning (not a hint)
     parameter_assignments: warning
+    record_literal_one_positional_no_trailing_comma: error
+    collection_methods_unrelated_type: warning
+    unrelated_type_equality_checks: warning
+    depend_on_referenced_packages: warning
+    unawaited_futures: warning
+    unnecessary_cast: warning
+    unused_import: warning
+    unnecessary_import: warning
 
   exclude:
     - "build/**"

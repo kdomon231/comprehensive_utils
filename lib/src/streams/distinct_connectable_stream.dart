@@ -1,13 +1,7 @@
-import 'dart:async';
-
 import 'package:comprehensive_utils/src/streams/distinct_subject.dart';
 import 'package:rxdart/rxdart.dart';
 
-abstract class _AbstractDistinctConnectableStream<
-  T,
-  S extends Subject<T>,
-  R extends Stream<T>
->
+abstract class _AbstractDistinctConnectableStream<T, S extends Subject<T>, R extends Stream<T>>
     extends AbstractConnectableStream<T, S, R> {
   _AbstractDistinctConnectableStream(super.source, super.subject)
     : assert(subject is R, 'Wrong Type'),
@@ -16,28 +10,13 @@ abstract class _AbstractDistinctConnectableStream<
 }
 
 class DistinctValueConnectableStream<T>
-    extends
-        _AbstractDistinctConnectableStream<
-          T,
-          DistinctSubject<T>,
-          DistinctValueStream<T>
-        >
+    extends _AbstractDistinctConnectableStream<T, DistinctSubject<T>, DistinctValueStream<T>>
     implements DistinctValueStream<T> {
-  DistinctValueConnectableStream(
-    Stream<T> source, {
-    bool sync = false,
-    bool Function(T, T)? equals,
-  }) : super(source, DistinctSubject<T>(sync: sync, equals: equals));
+  DistinctValueConnectableStream(Stream<T> source, {bool sync = false, bool Function(T, T)? equals})
+    : super(source, DistinctSubject<T>(sync: sync, equals: equals));
 
-  DistinctValueConnectableStream.seeded(
-    Stream<T> source,
-    T seedValue, {
-    bool sync = false,
-    bool Function(T, T)? equals,
-  }) : super(
-         source,
-         DistinctSubject<T>.seeded(seedValue, sync: sync, equals: equals),
-       );
+  DistinctValueConnectableStream.seeded(Stream<T> source, T seedValue, {bool sync = false, bool Function(T, T)? equals})
+    : super(source, DistinctSubject<T>.seeded(seedValue, sync: sync, equals: equals));
 
   @override
   bool get hasValue => _subject.hasValue;

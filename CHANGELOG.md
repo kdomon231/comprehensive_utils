@@ -1,3 +1,12 @@
+## 0.8.0
+
+* Fixed SliverList geometry change in `FluentListView`
+* Added `mapShareValue<R>` extension on `Stream<T>`
+* Added `mapToList<R>` extension on `Iterable<T>`
+* Added (syntactic sugar) extension `onResult()` on `Future<bool?>`
+* Migrated code to new SDK and updated dependencies
+* Require Dart 3.13.4 and Flutter 3.47.5
+
 ## 0.7.3
 
 * Added `ValueStreamCompleter<T>` and `DistinctStreamCompleter<T>`
@@ -54,7 +63,7 @@
 
 ## 0.6.9
 
-* Added (syntactic sugar) extensions `onSuccess()` and `onFailure()` to `Future<bool>`
+* Added (syntactic sugar) extensions `onSuccess()` and `onFailure()` on `Future<bool?>`
 
 ## 0.6.7
 

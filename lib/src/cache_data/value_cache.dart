@@ -25,8 +25,7 @@ class ValueCache<T> {
   /// Returns the cached value if available, otherwise fetches the value using the provided [callback].
   /// The fetched value will be cached for future use.
   Future<T> fetch(Future<T> Function() callback) async {
-    return _cachedValueFuture ??= callback()
-      ..whenComplete(_startStaleTimer).ignore();
+    return _cachedValueFuture ??= callback()..whenComplete(_startStaleTimer).ignore();
   }
 
   /// Sets a new value in the cache and resets the stale timer.

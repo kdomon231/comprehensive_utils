@@ -26,9 +26,7 @@ Future<String> getStream() {
   value.listen((v) {
     if (last == v) {
       timer.stop();
-      c.complete(
-        '''$v listeners notified | [GET_STREAM] objs time: ${timer.elapsedMicroseconds}ms''',
-      );
+      c.complete('''$v listeners notified | [GET_STREAM] objs time: ${timer.elapsedMicroseconds}ms''');
     }
   });
 
@@ -47,9 +45,7 @@ Future<String> newStream() {
   value.listen((v) {
     if (last == v) {
       timer.stop();
-      c.complete(
-        '''$v listeners notified | [LIGHT_STREAM] objs time: ${timer.elapsedMicroseconds}ms''',
-      );
+      c.complete('''$v listeners notified | [LIGHT_STREAM] objs time: ${timer.elapsedMicroseconds}ms''');
     }
   });
 
@@ -70,9 +66,7 @@ Future<String> stream() {
   value.stream.listen((v) {
     if (last == v) {
       timer.stop();
-      c.complete(
-        '''$v listeners notified | [STREAM] objs time: ${timer.elapsedMicroseconds}ms''',
-      );
+      c.complete('''$v listeners notified | [STREAM] objs time: ${timer.elapsedMicroseconds}ms''');
     }
   });
 

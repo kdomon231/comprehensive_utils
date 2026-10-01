@@ -8,7 +8,5 @@ class DistinctStreamCompleter<T> extends StreamCompleter<T> {
   final bool Function(T, T)? equals;
 
   @override
-  late final DistinctValueStream<T> stream = super.stream.shareDistinctValue(
-    equals,
-  );
+  late final DistinctValueStream<T> stream = super.stream.shareDistinctValue(equals);
 }

@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:collection';
 
 import 'package:comprehensive_utils/src/cache_data/cache_instance.dart';
 import 'package:flutter/foundation.dart';
@@ -7,8 +7,7 @@ import 'package:flutter/foundation.dart';
 base mixin class CacheManager {
   CacheManager();
 
-  final Map<String, CacheInstance<Object?>> _caches =
-      <String, CacheInstance<Object?>>{};
+  final Map<String, CacheInstance<Object?>> _caches = HashMap<String, CacheInstance<Object?>>();
 
   /// Retrieves the base cache for a specific [key].
   ///
@@ -33,24 +32,18 @@ base mixin class CacheManager {
   /// - key: The key for the cache.
   /// - timeToLive: The duration after which the cache will expire.
   /// - callback: The function for fetching data.
-  CacheConsumer<T> getConsumer<T>(
-    String key,
-    Duration timeToLive,
-    Future<T> Function() callback,
-  ) {
+  CacheConsumer<T> getConsumer<T>(String key, Duration timeToLive, Future<T> Function() callback) {
     final cache = _tryRetrieve<T, CacheConsumer<T>>(key);
     return cache ?? CacheConsumer<T>(_caches, key, timeToLive, callback);
   }
 
   /// Retrieves the consumer cache for a specific [key].
-  CacheConsumer<T> retrieveConsumer<T>(String key) =>
-      _caches[key]! as CacheConsumer<T>;
+  CacheConsumer<T> retrieveConsumer<T>(String key) => _caches[key]! as CacheConsumer<T>;
 
   // Tries to retrieve a cache instance for a specific key and type.
   // If the instance is not of the specified type, invalidates the instance.
   R? _tryRetrieve<T, R extends CacheInstance<T>>(String key) {
-    final instance = _caches[key];
-    if (instance != null) {
+    if (_caches[key] case final instance?) {
       if (instance is R) {
         return instance;
       }
