@@ -15,7 +15,8 @@ extension OnTapShortcut<T> on ValueChanged<T> {
   ///   title: Text(entry.entity.name),
   /// ),
   /// ```
-  VoidCallback apply(T value) => () => this.call(value);
+  VoidCallback apply(T value) =>
+      () => this.call(value);
 }
 
 extension OnTapShortcutAsync<T> on AsyncValueSetter<T> {
@@ -33,5 +34,6 @@ extension OnTapShortcutAsync<T> on AsyncValueSetter<T> {
   ///   title: Text(entry.entity.name),
   /// ),
   /// ```
-  AsyncCallback apply(T value) => () => this.call(value);
+  AsyncCallback apply(T value) =>
+      () => this.call(value);
 }

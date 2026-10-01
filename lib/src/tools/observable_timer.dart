@@ -11,14 +11,10 @@ class ObservableTimer extends RestartableTimer {
   factory ObservableTimer(Duration duration, VoidCallback callback) {
     final Stopwatch stopwatch = Stopwatch();
     // Create a new ObservableTimer that will call [callback] when the timer expires.
-    final timer = ObservableTimer._(
-      duration,
-      () {
-        stopwatch.stop();
-        callback.call();
-      },
-      stopwatch,
-    );
+    final timer = ObservableTimer._(duration, () {
+      stopwatch.stop();
+      callback.call();
+    }, stopwatch);
     stopwatch.start();
     return timer;
   }

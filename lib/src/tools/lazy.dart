@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 
 /// A generic class that allows lazy initialization of a value.
@@ -18,8 +16,7 @@ final class Lazy<T> {
   ///
   /// The [factory] parameter is a function that will be called to compute the value when it is first requested.
   /// It should return a [Future] that will complete with the value to be cached.
-  static Lazy<Future<T>> async<T>(AsyncValueGetter<T> factory) =>
-      _LazyAsync<T>(factory);
+  static LazyAsync<T> async<T>(AsyncValueGetter<T> factory) => LazyAsync<T>(factory);
 
   final ValueGetter<T> _factory;
   T? _value;
@@ -31,10 +28,9 @@ final class Lazy<T> {
   T get value => _value ??= _factory();
 }
 
-final class _LazyAsync<T> extends Lazy<Future<T>> {
-  _LazyAsync(super.factory);
+final class LazyAsync<T> extends Lazy<Future<T>> {
+  LazyAsync(super.factory);
 
   @override
-  Future<T> get value => _value ??=
-      _factory().then((value) => _value = SynchronousFuture<T>(value));
+  Future<T> get value => _value ??= _factory().then((value) => _value = SynchronousFuture<T>(value));
 }

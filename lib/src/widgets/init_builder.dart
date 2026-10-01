@@ -55,11 +55,7 @@ sealed class InitBuilder<T> extends StatefulWidget {
   }) = _GetterInitBuilder<T>;
 
   /// Base constructor for internal [InitBuilder] implementations.
-  const InitBuilder._({
-    required this.builder,
-    this.disposer,
-    super.key,
-  });
+  const InitBuilder._({required this.builder, this.disposer, super.key});
 
   /// Builder that is called with a previously initialized value.
   final ValueBuilderFn<T> builder;
@@ -75,14 +71,7 @@ sealed class InitBuilder<T> extends StatefulWidget {
     required ValueBuilderFn<T> builder,
     ValueSetter<T>? disposer,
     Key? key,
-  }) =>
-      _ArgInitBuilder<T, A>(
-        getter: getter,
-        arg: arg,
-        builder: builder,
-        disposer: disposer,
-        key: key,
-      );
+  }) => _ArgInitBuilder<T, A>(getter: getter, arg: arg, builder: builder, disposer: disposer, key: key);
 
   /// Constructor for record type argument getters.
   static InitBuilder<T> args<T, A extends Record>({
@@ -91,14 +80,7 @@ sealed class InitBuilder<T> extends StatefulWidget {
     required ValueBuilderFn<T> builder,
     ValueSetter<T>? disposer,
     Key? key,
-  }) =>
-      _ArgsInitBuilder<T, A>(
-        getter: getter,
-        args: args,
-        builder: builder,
-        disposer: disposer,
-        key: key,
-      );
+  }) => _ArgsInitBuilder<T, A>(getter: getter, args: args, builder: builder, disposer: disposer, key: key);
 
   /// Called by the widget state to initialize the value.
   T initValue();
@@ -146,12 +128,7 @@ class _InitBuilderState<T> extends State<InitBuilder<T>> {
 /// Implementation of InitBuilder that uses a simple getter function.
 final class _GetterInitBuilder<T> extends InitBuilder<T> {
   /// The getter function that provides the initial value.
-  const _GetterInitBuilder({
-    required this.getter,
-    required super.builder,
-    super.disposer,
-    super.key,
-  }) : super._();
+  const _GetterInitBuilder({required this.getter, required super.builder, super.disposer, super.key}) : super._();
 
   final ValueGetter<T> getter;
 
@@ -165,13 +142,8 @@ final class _GetterInitBuilder<T> extends InitBuilder<T> {
 /// Implementation of InitBuilder that uses a getter function with a single argument.
 final class _ArgInitBuilder<T, A> extends InitBuilder<T> {
   /// The getter function that takes an argument of type A and returns a value of type T.
-  const _ArgInitBuilder({
-    required this.getter,
-    required this.arg,
-    required super.builder,
-    super.disposer,
-    super.key,
-  }) : super._();
+  const _ArgInitBuilder({required this.getter, required this.arg, required super.builder, super.disposer, super.key})
+    : super._();
 
   final T Function(A) getter;
   final A arg;
@@ -180,21 +152,14 @@ final class _ArgInitBuilder<T, A> extends InitBuilder<T> {
   T initValue() => getter(arg);
 
   @override
-  bool shouldInit(_ArgInitBuilder<T, A> other) =>
-      arg != other.arg || getter != other.getter;
+  bool shouldInit(_ArgInitBuilder<T, A> other) => arg != other.arg || getter != other.getter;
 }
 
 /// Implementation of InitBuilder that uses a getter function with multiple arguments (record).
-final class _ArgsInitBuilder<T, A extends Record>
-    extends _ArgInitBuilder<T, A> {
+final class _ArgsInitBuilder<T, A extends Record> extends _ArgInitBuilder<T, A> {
   /// Creates an InitBuilder with multiple arguments using a record.
-  const _ArgsInitBuilder({
-    required super.getter,
-    required A args,
-    required super.builder,
-    super.disposer,
-    super.key,
-  }) : super(arg: args);
+  const _ArgsInitBuilder({required super.getter, required A args, required super.builder, super.disposer, super.key})
+    : super(arg: args);
 }
 
 abstract interface class DisposableInitData {

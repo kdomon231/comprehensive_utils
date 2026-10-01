@@ -5,6 +5,9 @@
 # IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
 # invoked from the command line by running `flutter analyze`.
 
+formatter:
+  page_width: 120
+
 analyzer:
   language:
     strict-casts: true
@@ -20,14 +23,19 @@ analyzer:
     todo: ignore
     # Reassignment should be treated as warning (not a hint)
     parameter_assignments: warning
+    record_literal_one_positional_no_trailing_comma: error
+    collection_methods_unrelated_type: warning
+    unrelated_type_equality_checks: warning
+    depend_on_referenced_packages: warning
+    unawaited_futures: warning
+    unnecessary_cast: warning
+    unused_import: warning
+    unnecessary_import: warning
 
   exclude:
+    - "build/**"
     - "bin/cache/**"
     - "**/*.g.dart"
-    - "**/lib/oss_licenses.dart"
-    - "**.pb.dart"
-    - "**.pbenum.dart"
-    - "**.pbjson.dart"
 
 linter:
   rules:
@@ -198,7 +206,7 @@ linter:
     # Null checks aren't required in ==() operators
     #
     # https://dart-lang.github.io/linter/lints/avoid_null_checks_in_equality_operators.html
-    - avoid_null_checks_in_equality_operators
+    # - avoid_null_checks_in_equality_operators
 
     # Good APIs don't use ambiguous boolean parameters. Instead, use named parameters
     # https://dart-lang.github.io/linter/lints/avoid_positional_boolean_parameters.html
@@ -212,7 +220,7 @@ linter:
     # Always prefer function references over typedefs.
     # Jumping twice in code to see the signature of a lambda sucks. This is different from the flutter analysis_options
     # https://dart-lang.github.io/linter/lints/avoid_private_typedef_functions.html
-    - avoid_private_typedef_functions
+    # - avoid_private_typedef_functions
 
     # Don't explicitly set defaults
     #
@@ -618,7 +626,7 @@ linter:
 
     # Only relevant for packages, not applications or general dart code
     # https://dart-lang.github.io/linter/lints/package_api_docs.html
-    - package_api_docs
+    # - package_api_docs
 
     # Follow dart style package naming convention
     #
@@ -943,7 +951,7 @@ linter:
 
     # Remove async/await clutter when not required
     # https://dart-lang.github.io/linter/lints/unnecessary_await_in_return.html
-    - unnecessary_await_in_return
+    # - unnecessary_await_in_return
 
     # Remove unnecessary braces
     #
@@ -1059,7 +1067,7 @@ linter:
     # Web only
     #
     # https://dart-lang.github.io/linter/lints/unsafe_html.html
-    - unsafe_html
+    # - unsafe_html
 
     # Very useful in preventing Flutter BuildContext bugs in async callbacks
     #

@@ -1,11 +1,12 @@
 import 'dart:collection';
+
 import 'package:collection/collection.dart';
 
 /// A class representing a collection of items with integer keys.
 ///
 /// This class provides methods to [add], [remove], and [clear] items from the collection.
 /// It also allows accessing items using their keys.
-class IndexingCollection<T> {
+final class IndexingCollection<T> {
   IndexingCollection();
 
   // A map that stores the items, with their keys being integers.

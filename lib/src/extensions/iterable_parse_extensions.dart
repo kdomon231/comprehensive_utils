@@ -7,9 +7,7 @@ extension JsonIterableParseExtension on Iterable<dynamic> {
   ///
   /// Returns a list of [T].
   List<T> parseList<T>(T Function(Map<String, Object?> json) fromJson) {
-    return [
-      for (final element in this) fromJson(element as Map<String, Object?>),
-    ];
+    return [for (final element in this) fromJson(element as Map<String, Object?>)];
   }
 
   /// Parses an iterable of `JSON` objects into an iterable of Dart objects.
@@ -18,10 +16,13 @@ extension JsonIterableParseExtension on Iterable<dynamic> {
   /// This function is used to convert each JSON object in the iterable into a Dart object.
   ///
   /// Returns an iterable of [T].
-  Iterable<T> parseIterable<T>(
-      T Function(Map<String, Object?> json) fromJson) sync* {
+  Iterable<T> parseIterable<T>(T Function(Map<String, Object?> json) fromJson) sync* {
     for (final element in this) {
       yield fromJson(element as Map<String, Object?>);
     }
   }
+}
+
+extension IterableExtension<T> on Iterable<T> {
+  List<R> mapToList<R>(R Function(T event) convert) => [for (final element in this) convert(element)];
 }
