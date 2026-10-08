@@ -1,3 +1,7 @@
+## 0.8.1
+
+* Allow `fast_immutable_collections: ^12.0.0`
+
 ## 0.8.0
 
 * Fixed SliverList geometry change in `FluentListView`
